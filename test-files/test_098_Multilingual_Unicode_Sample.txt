@@ -1,0 +1,8 @@
+Multilingual Handwriting Sample
+
+English: The quick brown fox jumps over the lazy dog.
+Bengali: আমাদের দেশে হবে সেই ছেলে কবে, কথায় না বড় হয়ে কাজে বড় হবে?
+Spanish: El veloz murciélago hindú comía feliz cardillo y kiwi.
+French: Portez ce vieux whisky au juge blond qui fume.
+German: Zwölf Boxkämpfer jagen Viktor quer über den großen Sylter Deich.
+Latin: Cogito, ergo sum. Carpe diem, quam minimum credula postero.

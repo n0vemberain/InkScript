@@ -51,6 +51,11 @@ export async function exportElementsToPdf(
       logging: false,
       onclone: (_clonedDoc, clonedElement) => {
         // Strip zoom scaling, outer margins and box shadows for clean print output
+        clonedElement.style.position = 'static';
+        clonedElement.style.left = '0';
+        clonedElement.style.top = '0';
+        clonedElement.style.opacity = '1';
+        clonedElement.style.visibility = 'visible';
         clonedElement.style.transform = 'none';
         clonedElement.style.margin = '0';
         clonedElement.style.boxShadow = 'none';

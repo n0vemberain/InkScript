@@ -44,8 +44,8 @@
 .paper-grid {
   background-color: #ffffff;
   background-image: 
-    linear-gradient(to right, #e2e8f0 1px, transparent 1px),
-    linear-gradient(to bottom, #e2e8f0 1px, transparent 1px);
+    linear-gradient(to right, #cbd5e1 1px, transparent 1px),
+    linear-gradient(to bottom, #cbd5e1 1px, transparent 1px);
 }
 
 .paper-dotted {
@@ -78,7 +78,7 @@
 
 /* Paper textures */
 .texture-grain {
-  background-image: radial-gradient(rgba(0, 0, 0, 0.02) 1px, transparent 0);
+  background-image: radial-gradient(rgba(0, 0, 0, 0.025) 1px, transparent 0);
   background-size: 4px 4px;
 }
 
@@ -104,12 +104,6 @@
   box-shadow: 0 2px 3px rgba(0, 0, 0, 0.3);
 }
 
-/* Subtle handwriting organic variation */
-.natural-handwriting span {
-  display: inline-block;
-  transform-origin: bottom center;
-}
-
 /* Paper sheet shadow */
 .notebook-sheet-shadow {
   box-shadow: 
@@ -125,12 +119,30 @@
     background: white !important;
     color: black !important;
   }
-  .no-print {
+  header,
+  nav,
+  .no-print,
+  aside,
+  button,
+  .lg\:col-span-5 {
     display: none !important;
   }
-  .print-page {
-    page-break-after: always;
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+  }
+  .lg\:col-span-7 {
+    width: 100% !important;
+    position: static !important;
+  }
+  .notebook-sheet-shadow {
     box-shadow: none !important;
     margin: 0 !important;
+    border-radius: 0 !important;
+  }
+  [data-page-index] {
+    page-break-after: always !important;
+    break-after: page !important;
   }
 }

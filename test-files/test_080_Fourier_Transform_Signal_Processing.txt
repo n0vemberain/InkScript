@@ -1,0 +1,12 @@
+Technical Proof & Derivation: Fourier Transform Signal Processing
+
+Theorem 1.1: For all epsilon > 0, there exists delta > 0 such that:
+   0 < |x - a| < delta  ==>  |f(x) - L| < epsilon
+
+Proof Construction:
+Let epsilon be arbitrary. Select delta = min(1, epsilon / (2 * |a| + 1)).
+Then by the triangle inequality, |x + a| <= |x - a| + 2|a| < 1 + 2|a|.
+Therefore:
+   |x^2 - a^2| = |x - a| * |x + a| < delta * (2|a| + 1) <= epsilon.
+
+Hence the limit as x -> a of x^2 is identically a^2. Q.E.D.

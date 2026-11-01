@@ -1,0 +1,8 @@
+Punctuation & Glyph Integrity Test:
+
+Quotes: "Double quotes", 'Single quotes', .
+Dashes: Hyphen (-), En-dash (--), Em-dash (---).
+Brackets: (Parentheses), [Square brackets], {Curly braces}, <Angle brackets>.
+Math & Currency: , 50%, 10 & 20 = 30, x * y / z + w - v = 0.
+Special Symbols: #1 @mention ~tilde ^caret *asterisk /slash ackslash |pipe.
+Numbers: 0123456789, 3.1415926535, 1,000,000.00.

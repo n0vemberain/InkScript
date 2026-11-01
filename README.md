@@ -144,6 +144,18 @@ Serve the production build locally to test performance and assets:
 npm run preview
 ```
 
+### Automated 100-File Test Suite
+Execute the automated test suite across all 100 benchmark documents:
+```bash
+node scripts/run_100_tests.mjs
+```
+
+---
+
+## Audit Report and Documentation
+
+For a complete button-by-button inventory, responsiveness review, settings necessity assessment, and 100-file benchmark statistics, see [AUDIT_REPORT.md](AUDIT_REPORT.md).
+
 ---
 
 ## License

@@ -85,7 +85,13 @@ export function PaperPreview({
   pageRefs
 }: PaperPreviewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [zoomLevel, setZoomLevel] = useState<number>(0.92);
+  const [zoomLevel, setZoomLevel] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      if (window.innerWidth < 640) return 0.45;
+      if (window.innerWidth < 1024) return 0.68;
+    }
+    return 0.92;
+  });
 
   // Dynamic Font Selection: Custom Uploaded Font -> or Fallback to Built-in Google Web Fonts
   const activeFontFamily = useMemo(() => {
@@ -214,18 +220,26 @@ export function PaperPreview({
   };
 
   // Render a single A4 paper sheet (standard 794px x 1123px)
-  const renderPaperSheet = (pageIndex: number, pageContent: string) => {
+  const renderPaperSheet = (pageIndex: number, pageContent: string, isExport = false) => {
     const marginLineLeft = settings.marginOffset > 0 ? settings.marginOffset : Math.max(20, settings.paddingLeft - 16);
 
     return (
       <div
-        key={pageIndex}
+        key={isExport ? `export-${pageIndex}` : pageIndex}
         ref={(el) => {
-          if (el) pageRefs.current.set(pageIndex, el);
-          else pageRefs.current.delete(pageIndex);
+          if (isExport) {
+            if (el) pageRefs.current.set(pageIndex, el);
+          } else if (viewMode === 'all') {
+            if (el) pageRefs.current.set(pageIndex, el);
+          } else if (pageIndex === safeCurrentPage - 1) {
+            // In single mode, ensure fallback if needed
+            if (el && !pageRefs.current.has(pageIndex)) pageRefs.current.set(pageIndex, el);
+          }
         }}
         data-page-index={pageIndex}
-        className="relative mx-auto bg-white notebook-sheet-shadow overflow-hidden transition-all duration-300 print:shadow-none print:m-0"
+        className={`relative mx-auto bg-white notebook-sheet-shadow overflow-hidden transition-all duration-300 print:shadow-none print:m-0 ${
+          isExport ? 'shadow-none' : ''
+        }`}
         style={{
           // Standard A4 dimensions in px at 96 DPI: 794px width x 1123px height
           width: '794px',
@@ -478,68 +492,20 @@ export function PaperPreview({
         </div>
       </div>
 
-      {/* Hidden Offscreen Export Stage (Ensures all pages are captured for multi-page PDF generation) */}
+      {/* Hidden Offscreen Export Stage (Ensures all pages are captured for multi-page PDF generation at true 300 DPI) */}
       <div
         aria-hidden="true"
-        className="absolute -left-[9999px] -top-[9999px] pointer-events-none opacity-0"
+        style={{
+          position: 'fixed',
+          left: '-9999px',
+          top: 0,
+          width: '794px',
+          pointerEvents: 'none',
+          zIndex: -9999,
+          opacity: 1
+        }}
       >
-        {pages.map((pageContent, idx) => (
-          <div
-            key={`export-${idx}`}
-            ref={(el) => {
-              if (el) pageRefs.current.set(idx, el);
-            }}
-            style={{
-              width: '794px',
-              minHeight: '1123px',
-              ...getPaperBackgroundStyle()
-            }}
-            className="bg-white"
-          >
-            {/* Red Left Margin Line */}
-            {settings.showMarginLine && (
-              <div
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  bottom: 0,
-                  left: `${settings.marginOffset > 0 ? settings.marginOffset : Math.max(20, settings.paddingLeft - 16)}px`,
-                  width: '2px',
-                  backgroundColor: settings.marginLineColor
-                }}
-              />
-            )}
-            {/* Page number */}
-            <div
-              style={{
-                position: 'absolute',
-                top: '16px',
-                right: '32px',
-                fontSize: '12px',
-                fontFamily: 'monospace',
-                color: '#94a3b8'
-              }}
-            >
-              Page {idx + 1} of {totalPages}
-            </div>
-            {/* Text Content with handwriting jitter */}
-            <div
-              style={{
-                fontFamily: activeFontFamily,
-                fontSize: `${settings.fontSize}px`,
-                letterSpacing: `${settings.letterSpacing}px`,
-                color: settings.inkColor,
-                fontWeight: settings.fontWeight,
-                paddingTop: `${settings.paddingTop}px`,
-                paddingBottom: `${settings.paddingBottom}px`,
-                paddingLeft: `${settings.paddingLeft}px`,
-                paddingRight: `${settings.paddingRight}px`
-              }}
-            >
-              {renderHandwrittenContent(pageContent)}
-            </div>
-          </div>
-        ))}
+        {pages.map((pageContent, idx) => renderPaperSheet(idx, pageContent, true))}
       </div>
 
       {/* Bottom status bar */}
