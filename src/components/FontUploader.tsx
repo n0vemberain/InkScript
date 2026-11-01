@@ -12,7 +12,7 @@ import {
 import type { CustomFontInfo } from '../types';
 import { loadCustomFontFile, formatFileSize } from '../utils/fontLoader';
 
-interface CustomFontTabProps {
+export interface FontUploaderProps {
   customFonts: CustomFontInfo[];
   onAddCustomFont: (font: CustomFontInfo) => void;
   onRemoveCustomFont: (id: string) => void;
@@ -20,13 +20,13 @@ interface CustomFontTabProps {
   onSelectFont: (id: string) => void;
 }
 
-export function CustomFontTab({
+export function FontUploader({
   customFonts,
   onAddCustomFont,
   onRemoveCustomFont,
   activeFontId,
   onSelectFont
-}: CustomFontTabProps) {
+}: FontUploaderProps) {
   const [isDragOver, setIsDragOver] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -106,13 +106,13 @@ export function CustomFontTab({
           </div>
 
           <h3 className="mt-3 text-sm font-semibold text-slate-100">
-            {isLoading ? 'Processing font...' : 'Drop your handwriting font file here'}
+            {isLoading ? 'Registering font with FontFace API...' : 'Drop your handwriting font file here'}
           </h3>
           <p className="mt-1 text-xs text-slate-400">
-            Upload custom handwritten typography (.ttf, .otf, .woff, .woff2)
+            Upload personal handwriting typography (.ttf, .otf, .woff, .woff2)
           </p>
           <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-slate-700/60 px-2.5 py-0.5 text-[10px] text-slate-300">
-            Dynamically loaded into your browser session
+            Instant browser-session FontFace registration
           </span>
         </div>
 
@@ -128,7 +128,7 @@ export function CustomFontTab({
       <div>
         <div className="mb-2 flex items-center justify-between">
           <label className="text-xs font-semibold uppercase tracking-wider text-slate-300">
-            Active Custom Fonts ({customFonts.length})
+            Registered Custom Fonts ({customFonts.length})
           </label>
         </div>
 
@@ -242,10 +242,10 @@ export function CustomFontTab({
       <div className="rounded-2xl border border-slate-700/60 bg-slate-800/30 p-4 text-xs text-slate-400 space-y-2">
         <div className="flex items-center gap-1.5 font-semibold text-slate-300">
           <Info className="h-4 w-4 text-blue-400" />
-          How to turn your own handwriting into a font
+          Turn your own physical handwriting into a font
         </div>
         <p className="leading-relaxed">
-          Want notes that look exactly like your handwriting? You can print a free template from{' '}
+          Want handwritten notes in your actual handwriting? Print a free character template from{' '}
           <a
             href="https://www.calligraphr.com/"
             target="_blank"
@@ -254,7 +254,7 @@ export function CustomFontTab({
           >
             Calligraphr <ExternalLink className="h-3 w-3" />
           </a>
-          , fill it in with a black pen, snap a photo with your phone, and download your personal <code className="text-slate-300 font-mono">.ttf</code> file to drop here!
+          , fill it in with a black pen, snap a photo with your phone, and drop the resulting <code className="text-slate-300 font-mono">.ttf</code> file here!
         </p>
       </div>
     </div>

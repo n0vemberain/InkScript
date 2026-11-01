@@ -12,7 +12,8 @@ import {
   CheckCircle,
   X,
   FileBox,
-  Layers
+  Layers,
+  Sparkles
 } from 'lucide-react';
 import {
   extractTextFromPdf,
@@ -23,7 +24,7 @@ import {
 import { SAMPLE_TEXTS } from '../constants/presets';
 import { formatFileSize } from '../utils/fontLoader';
 
-interface UploadTextTabProps {
+export interface PdfConverterProps {
   text: string;
   onTextChange: (newText: string) => void;
   isExtracting: boolean;
@@ -33,7 +34,7 @@ interface UploadTextTabProps {
   estimatedPages: number;
 }
 
-export function UploadTextTab({
+export function PdfConverter({
   text,
   onTextChange,
   isExtracting,
@@ -41,8 +42,9 @@ export function UploadTextTab({
   extractionProgress,
   onProgressChange,
   estimatedPages
-}: UploadTextTabProps) {
+}: PdfConverterProps) {
   const [isDragOver, setIsDragOver] = useState(false);
+  const [showSampleMenu, setShowSampleMenu] = useState(false);
   const [errorMessage, setErrorMessage] = useState<{
     title: string;
     description: string;
@@ -203,7 +205,6 @@ export function UploadTextTab({
   const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       validateAndProcessFile(e.target.files[0]);
-      // Reset input value so re-selecting same file triggers onChange
       e.target.value = '';
     }
   };
@@ -363,45 +364,53 @@ export function UploadTextTab({
         </div>
       )}
 
-      {/* 4. Sample Text Quick Buttons */}
-      <div>
-        <div className="mb-2 flex items-center justify-between text-xs text-slate-400">
-          <span className="flex items-center gap-1.5 font-medium">
-            <BookOpen className="h-3.5 w-3.5 text-blue-400" /> Or load ready sample text:
+      {/* 4. Instant Sample Text Buttons */}
+      <div className="rounded-xl border border-slate-800 bg-slate-800/40 p-3">
+        <div className="mb-2 flex items-center justify-between text-xs">
+          <span className="flex items-center gap-1.5 font-medium text-slate-300">
+            <BookOpen className="h-3.5 w-3.5 text-blue-400" /> Sample Text (Instant Test):
           </span>
+          <button
+            type="button"
+            onClick={() => setShowSampleMenu(!showSampleMenu)}
+            className="inline-flex items-center gap-1 rounded bg-blue-500/10 px-2 py-0.5 text-[11px] font-medium text-blue-400 hover:bg-blue-500/20 transition"
+          >
+            <Sparkles className="h-3 w-3" /> Quick Samples
+          </button>
         </div>
+
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           <button
             type="button"
+            onClick={() => onTextChange(SAMPLE_TEXTS.college)}
+            className="rounded-lg border border-slate-700 bg-slate-800/80 px-2.5 py-1.5 text-left text-xs text-slate-200 hover:border-blue-500 hover:bg-slate-700/80 transition"
+          >
+            <div className="font-medium text-slate-100 truncate">College Physics</div>
+            <div className="text-[10px] text-slate-400">Quantum Problem Set</div>
+          </button>
+          <button
+            type="button"
+            onClick={() => onTextChange(SAMPLE_TEXTS.letter)}
+            className="rounded-lg border border-slate-700 bg-slate-800/80 px-2.5 py-1.5 text-left text-xs text-slate-200 hover:border-amber-500 hover:bg-slate-700/80 transition"
+          >
+            <div className="font-medium text-slate-100 truncate">Personal Letter</div>
+            <div className="text-[10px] text-slate-400">Autumn Reflection</div>
+          </button>
+          <button
+            type="button"
+            onClick={() => onTextChange(SAMPLE_TEXTS.notes)}
+            className="rounded-lg border border-slate-700 bg-slate-800/80 px-2.5 py-1.5 text-left text-xs text-slate-200 hover:border-emerald-500 hover:bg-slate-700/80 transition"
+          >
+            <div className="font-medium text-slate-100 truncate">Quick Notes</div>
+            <div className="text-[10px] text-slate-400">Daily Brainstorm</div>
+          </button>
+          <button
+            type="button"
             onClick={() => onTextChange(SAMPLE_TEXTS.essay)}
-            className="rounded-lg border border-slate-700 bg-slate-800/80 px-2.5 py-1.5 text-left text-xs text-slate-200 hover:border-slate-500 hover:bg-slate-700/80 transition"
+            className="rounded-lg border border-slate-700 bg-slate-800/80 px-2.5 py-1.5 text-left text-xs text-slate-200 hover:border-purple-500 hover:bg-slate-700/80 transition"
           >
-            <div className="font-medium text-slate-100">Philosophy</div>
-            <div className="text-[10px] text-slate-400">Handwriting Essay</div>
-          </button>
-          <button
-            type="button"
-            onClick={() => onTextChange(SAMPLE_TEXTS.lecture)}
-            className="rounded-lg border border-slate-700 bg-slate-800/80 px-2.5 py-1.5 text-left text-xs text-slate-200 hover:border-slate-500 hover:bg-slate-700/80 transition"
-          >
-            <div className="font-medium text-slate-100">Physics 204</div>
-            <div className="text-[10px] text-slate-400">Quantum Notes</div>
-          </button>
-          <button
-            type="button"
-            onClick={() => onTextChange(SAMPLE_TEXTS.recipe)}
-            className="rounded-lg border border-slate-700 bg-slate-800/80 px-2.5 py-1.5 text-left text-xs text-slate-200 hover:border-slate-500 hover:bg-slate-700/80 transition"
-          >
-            <div className="font-medium text-slate-100">Bread Recipe</div>
-            <div className="text-[10px] text-slate-400">Sourdough Loaf</div>
-          </button>
-          <button
-            type="button"
-            onClick={() => onTextChange(SAMPLE_TEXTS.reflection)}
-            className="rounded-lg border border-slate-700 bg-slate-800/80 px-2.5 py-1.5 text-left text-xs text-slate-200 hover:border-slate-500 hover:bg-slate-700/80 transition"
-          >
-            <div className="font-medium text-slate-100">Journal</div>
-            <div className="text-[10px] text-slate-400">Daily Reflection</div>
+            <div className="font-medium text-slate-100 truncate">Philosophy</div>
+            <div className="text-[10px] text-slate-400">Architecture of Thought</div>
           </button>
         </div>
       </div>

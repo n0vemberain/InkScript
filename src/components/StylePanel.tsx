@@ -6,22 +6,23 @@ import {
   Check,
   Sparkles,
   AlignLeft,
-  CircleDot
+  CircleDot,
+  Wand2
 } from 'lucide-react';
 import { HANDWRITING_FONTS, INK_COLORS, PAPER_STYLES } from '../constants/presets';
 import type { CustomFontInfo, HandwritingSettings, PaperType } from '../types';
 
-interface StylePaperTabProps {
+export interface StylePanelProps {
   settings: HandwritingSettings;
   onUpdateSettings: (updates: Partial<HandwritingSettings>) => void;
   customFonts: CustomFontInfo[];
 }
 
-export function StylePaperTab({
+export function StylePanel({
   settings,
   onUpdateSettings,
   customFonts
-}: StylePaperTabProps) {
+}: StylePanelProps) {
   const currentPaperConfig = PAPER_STYLES[settings.paperType] || PAPER_STYLES.ruled;
 
   // Combine standard handwriting fonts and custom fonts
@@ -273,15 +274,49 @@ export function StylePaperTab({
         </div>
       </div>
 
-      {/* 4. Typography & Natural Controls (Sliders) */}
+      {/* 4. Handwriting Humanization: Natural Handwriting Variance Toggle */}
+      <div className="rounded-2xl border border-indigo-500/30 bg-indigo-500/10 p-4 space-y-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-500/20 text-indigo-400">
+              <Wand2 className="h-4 w-4" />
+            </div>
+            <div>
+              <div className="text-xs font-semibold text-slate-100 flex items-center gap-2">
+                Natural Handwriting Variance
+                <span className={`rounded px-1.5 py-0.2 text-[9px] font-semibold ${
+                  settings.naturalJitter ? 'bg-indigo-500/30 text-indigo-300' : 'bg-slate-700 text-slate-400'
+                }`}>
+                  {settings.naturalJitter ? 'Active' : 'Disabled'}
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-400">
+                Random micro-rotation (-0.4° to +0.4°), ±1px baseline shift, & uneven ink pool opacity
+              </p>
+            </div>
+          </div>
+
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              checked={settings.naturalJitter}
+              onChange={(e) => onUpdateSettings({ naturalJitter: e.target.checked })}
+              className="sr-only peer"
+            />
+            <div className="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+          </label>
+        </div>
+      </div>
+
+      {/* 5. Typography & Natural Controls (Sliders) */}
       <div className="rounded-2xl border border-slate-700/80 bg-slate-800/40 p-4 space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-slate-300">
             <Sliders className="h-3.5 w-3.5 text-blue-400" />
-            Typography & Natural Line Spacing
+            Typography & Spacing Sliders
           </div>
           <span className="text-[10px] text-blue-400">
-            Lines align with paper ruling
+            Zero layout shifts
           </span>
         </div>
 
@@ -420,7 +455,7 @@ export function StylePaperTab({
         </div>
       </div>
 
-      {/* 5. Paper Realism Details */}
+      {/* 6. Paper Realism Details */}
       <div className="rounded-2xl border border-slate-700/80 bg-slate-800/40 p-4 space-y-3">
         <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-slate-300">
           <Sparkles className="h-3.5 w-3.5 text-amber-400" />
@@ -428,20 +463,6 @@ export function StylePaperTab({
         </div>
 
         <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-          {/* Natural Organic Jitter */}
-          <label className="flex items-center justify-between rounded-xl border border-slate-700/70 bg-slate-800/80 p-2.5 text-xs text-slate-200 cursor-pointer hover:bg-slate-800">
-            <div className="flex items-center gap-2">
-              <span className="font-medium">Organic Letter Tilt</span>
-              <span className="text-[10px] text-slate-400">(Natural variance)</span>
-            </div>
-            <input
-              type="checkbox"
-              checked={settings.naturalJitter}
-              onChange={(e) => onUpdateSettings({ naturalJitter: e.target.checked })}
-              className="h-4 w-4 rounded border-slate-600 bg-slate-700 text-blue-500 focus:ring-blue-500"
-            />
-          </label>
-
           {/* Vertical Red Margin Rule */}
           <label className="flex items-center justify-between rounded-xl border border-slate-700/70 bg-slate-800/80 p-2.5 text-xs text-slate-200 cursor-pointer hover:bg-slate-800">
             <div className="flex items-center gap-2">
@@ -455,38 +476,38 @@ export function StylePaperTab({
               className="h-4 w-4 rounded border-slate-600 bg-slate-700 text-blue-500 focus:ring-blue-500"
             />
           </label>
-        </div>
 
-        {/* Binder Holes / Spiral binding */}
-        <div>
-          <div className="text-xs text-slate-400 mb-1.5 flex items-center gap-1">
-            <AlignLeft className="h-3 w-3" /> Binder Punch / Binding Style:
-          </div>
-          <div className="grid grid-cols-3 gap-2">
-            {[
-              { id: '3-hole', label: '3-Hole Punched' },
-              { id: 'spiral', label: 'Spiral Ring Coil' },
-              { id: 'none', label: 'Clean Edge (None)' }
-            ].map((b) => (
-              <button
-                key={b.id}
-                type="button"
-                onClick={() =>
-                  onUpdateSettings({
-                    showHoles: b.id !== 'none',
-                    holeType: b.id as '3-hole' | 'spiral' | 'none'
-                  })
-                }
-                className={`rounded-lg border px-2 py-1.5 text-xs font-medium transition ${
-                  (b.id === 'none' && !settings.showHoles) ||
-                  (settings.showHoles && settings.holeType === b.id)
-                    ? 'border-blue-500 bg-blue-500/20 text-blue-300'
-                    : 'border-slate-700 bg-slate-800 text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                {b.label}
-              </button>
-            ))}
+          {/* Binder Holes / Spiral binding */}
+          <div className="rounded-xl border border-slate-700/70 bg-slate-800/80 p-2 text-xs text-slate-200 flex items-center justify-between">
+            <span className="font-medium flex items-center gap-1">
+              <AlignLeft className="h-3 w-3 text-slate-400" /> Binding:
+            </span>
+            <div className="flex gap-1">
+              {[
+                { id: '3-hole', label: '3-Hole' },
+                { id: 'spiral', label: 'Spiral' },
+                { id: 'none', label: 'None' }
+              ].map((b) => (
+                <button
+                  key={b.id}
+                  type="button"
+                  onClick={() =>
+                    onUpdateSettings({
+                      showHoles: b.id !== 'none',
+                      holeType: b.id as '3-hole' | 'spiral' | 'none'
+                    })
+                  }
+                  className={`rounded px-1.5 py-0.5 text-[10px] font-medium transition ${
+                    (b.id === 'none' && !settings.showHoles) ||
+                    (settings.showHoles && settings.holeType === b.id)
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-slate-700 text-slate-400 hover:text-white'
+                  }`}
+                >
+                  {b.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>

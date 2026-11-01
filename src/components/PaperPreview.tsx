@@ -14,7 +14,7 @@ import type { HandwritingSettings, CustomFontInfo } from '../types';
 import { HANDWRITING_FONTS, PAPER_STYLES } from '../constants/presets';
 import { paginateText } from '../utils/pagination';
 
-interface PaperPreviewProps {
+export interface PaperPreviewProps {
   text: string;
   settings: HandwritingSettings;
   customFonts: CustomFontInfo[];
@@ -23,6 +23,55 @@ interface PaperPreviewProps {
   viewMode: 'single' | 'all';
   onToggleViewMode: () => void;
   pageRefs: MutableRefObject<Map<number, HTMLDivElement>>;
+}
+
+/**
+ * Calculates deterministic natural handwriting imperfections without causing layout shifts.
+ * 1. Micro-rotation between -0.4deg and +0.4deg.
+ * 2. Minor baseline shifting (+/- 1px).
+ * 3. Subtle opacity fluctuation to mimic uneven fountain/ballpoint ink pooling.
+ */
+function getWordJitterStyle(
+  word: string,
+  lineIdx: number,
+  wordIdx: number,
+  baseOpacity: number,
+  enabled: boolean
+): CSSProperties {
+  if (!enabled) {
+    return {
+      display: 'inline-block',
+      opacity: baseOpacity
+    };
+  }
+
+  // Deterministic 32-bit hash
+  let hash = (lineIdx * 73 + wordIdx * 37) | 0;
+  for (let i = 0; i < word.length; i++) {
+    hash = ((hash << 5) - hash + word.charCodeAt(i)) | 0;
+  }
+  const absHash = Math.abs(hash);
+
+  // 1. Rotation between -0.4deg and +0.4deg
+  const rotFactor = (absHash % 1000) / 1000;
+  const rotationDeg = (rotFactor * 0.8 - 0.4).toFixed(2);
+
+  // 2. Minor baseline shifting (+/- 1px)
+  const shiftFactor = ((absHash >> 3) % 1000) / 1000;
+  const baselineShiftY = (shiftFactor * 2.0 - 1.0).toFixed(2);
+
+  // 3. Subtle opacity variation to mimic uneven ink flow (+/- 0.05 around baseOpacity)
+  const opacityFactor = ((absHash >> 6) % 1000) / 1000;
+  const opacityDelta = opacityFactor * 0.10 - 0.05;
+  const finalOpacity = Math.min(1.0, Math.max(0.72, baseOpacity + opacityDelta));
+
+  return {
+    display: 'inline-block',
+    transform: `rotate(${rotationDeg}deg) translateY(${baselineShiftY}px)`,
+    transformOrigin: 'bottom center',
+    opacity: Number(finalOpacity.toFixed(3)),
+    willChange: 'transform'
+  };
 }
 
 export function PaperPreview({
@@ -113,7 +162,7 @@ export function PaperPreview({
     return bgStyles;
   };
 
-  // Render text lines with natural organic micro-jitter
+  // Render text lines with natural human handwriting imperfections (zero layout shifts)
   const renderHandwrittenContent = (pageContent: string) => {
     if (!pageContent.trim()) {
       return (
@@ -126,34 +175,31 @@ export function PaperPreview({
     const lines = pageContent.split('\n');
 
     return lines.map((line, lineIdx) => {
-      // Deterministic slight angle rotation for natural variance
-      const pseudoRandomAngle = settings.naturalJitter
-        ? ((lineIdx * 7 + line.length * 3) % 7 - 3) * 0.12
-        : 0;
-
       const words = line.split(' ');
 
       return (
         <div
           key={lineIdx}
-          className="relative whitespace-pre-wrap break-words transition-transform duration-150"
+          className="relative whitespace-pre-wrap break-words"
           style={{
             height: `${settings.lineHeight}px`,
-            lineHeight: `${settings.lineHeight}px`,
-            transform: settings.naturalJitter ? `rotate(${pseudoRandomAngle}deg)` : undefined
+            lineHeight: `${settings.lineHeight}px`
           }}
         >
           {words.map((word, wordIdx) => {
-            const wordWiggleY = settings.naturalJitter
-              ? ((lineIdx * 13 + wordIdx * 17) % 5 - 2) * 0.35
-              : 0;
+            const jitterStyle = getWordJitterStyle(
+              word,
+              lineIdx,
+              wordIdx,
+              settings.inkOpacity,
+              settings.naturalJitter
+            );
 
             return (
               <span
                 key={wordIdx}
                 style={{
-                  display: 'inline-block',
-                  transform: settings.naturalJitter ? `translateY(${wordWiggleY}px)` : undefined,
+                  ...jitterStyle,
                   marginRight: `${settings.wordSpacing}px`
                 }}
               >
@@ -250,7 +296,6 @@ export function PaperPreview({
             fontSize: `${settings.fontSize}px`,
             letterSpacing: `${settings.letterSpacing}px`,
             color: settings.inkColor,
-            opacity: settings.inkOpacity,
             fontWeight: settings.fontWeight,
             paddingTop: `${settings.paddingTop}px`,
             paddingBottom: `${settings.paddingBottom}px`,
@@ -381,7 +426,7 @@ export function PaperPreview({
                 onClick={() => {
                   onPageChange(pageNum);
                   if (viewMode === 'all') {
-                    // Scroll to that page in continuous view
+                    // Scroll smoothly to that page in continuous view
                     const pageEl = pageRefs.current.get(idx);
                     pageEl?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                   }
@@ -433,7 +478,7 @@ export function PaperPreview({
         </div>
       </div>
 
-      {/* Hidden Offscreen Export Stage (Ensures all pages are always available for html2canvas multi-page export) */}
+      {/* Hidden Offscreen Export Stage (Ensures all pages are captured for multi-page PDF generation) */}
       <div
         aria-hidden="true"
         className="absolute -left-[9999px] -top-[9999px] pointer-events-none opacity-0"
@@ -477,14 +522,13 @@ export function PaperPreview({
             >
               Page {idx + 1} of {totalPages}
             </div>
-            {/* Text Content */}
+            {/* Text Content with handwriting jitter */}
             <div
               style={{
                 fontFamily: activeFontFamily,
                 fontSize: `${settings.fontSize}px`,
                 letterSpacing: `${settings.letterSpacing}px`,
                 color: settings.inkColor,
-                opacity: settings.inkOpacity,
                 fontWeight: settings.fontWeight,
                 paddingTop: `${settings.paddingTop}px`,
                 paddingBottom: `${settings.paddingBottom}px`,
@@ -500,11 +544,20 @@ export function PaperPreview({
 
       {/* Bottom status bar */}
       <div className="flex items-center justify-between border-t border-slate-800 bg-slate-900/60 px-4 py-2 text-[11px] text-slate-400">
-        <div>
-          Paper: <strong className="text-slate-300">{paperConfig.name}</strong> • Font: <strong className="text-slate-300">{activeFontFamily.split(',')[0].replace(/['"]/g, '')}</strong>
+        <div className="flex items-center gap-3">
+          <span>Paper: <strong className="text-slate-300">{paperConfig.name}</strong></span>
+          <span>•</span>
+          <span>Font: <strong className="text-slate-300">{activeFontFamily.split(',')[0].replace(/['"]/g, '')}</strong></span>
+          <span>•</span>
+          <span>
+            Jitter Variance:{' '}
+            <strong className={settings.naturalJitter ? 'text-indigo-400' : 'text-slate-500'}>
+              {settings.naturalJitter ? 'Active (±0.4°)' : 'Off'}
+            </strong>
+          </span>
         </div>
         <div className="font-mono">
-          A4 Standard (210 × 297mm) • Scale 300DPI
+          A4 (210 × 297mm) • 300 DPI Export
         </div>
       </div>
     </div>

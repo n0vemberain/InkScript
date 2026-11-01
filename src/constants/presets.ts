@@ -253,7 +253,7 @@ export const DEFAULT_SETTINGS: HandwritingSettings = {
   fontWeight: 500,
   inkColor: '#1a365d', // Royal Blue Ballpoint
   inkOpacity: 0.95,
-  naturalJitter: true,
+  naturalJitter: true, // "Natural Handwriting Variance" enabled by default
   paperType: 'ruled',
   showMarginLine: true,
   marginLineColor: '#ef4444', // Distinct red left-margin line
@@ -268,107 +268,62 @@ export const DEFAULT_SETTINGS: HandwritingSettings = {
   zoom: 1
 };
 
-export const PRESET_THEMES: PresetTheme[] = [
-  {
-    id: 'student-notebook',
-    name: 'Student Notebook',
-    description: 'Royal Blue Ballpoint on classic ruled lined paper',
-    badge: 'Popular',
-    settings: {
-      fontId: 'caveat',
-      fontSize: 20,
-      lineHeight: 32,
-      letterSpacing: 0.5,
-      inkColor: '#1a365d',
-      paperType: 'ruled',
-      showMarginLine: true,
-      marginLineColor: '#ef4444',
-      showHoles: true,
-      holeType: '3-hole',
-      paddingLeft: 84,
-      paddingTop: 54
-    }
-  },
-  {
-    id: 'ballpoint-memo',
-    name: 'Gel Black Memo',
-    description: 'Gel black ink on clean college ruled paper',
-    badge: 'Daily',
-    settings: {
-      fontId: 'kalam',
-      fontSize: 19,
-      lineHeight: 30,
-      letterSpacing: 0.2,
-      inkColor: '#18181b',
-      paperType: 'ruled',
-      showMarginLine: true,
-      marginLineColor: '#ef4444',
-      showHoles: false,
-      holeType: 'none',
-      paddingLeft: 84,
-      paddingTop: 54
-    }
-  },
-  {
-    id: 'architect-notes',
-    name: 'Architect Grid',
-    description: 'Graph paper with 2B pencil drafting lettering',
-    badge: 'Technical',
-    settings: {
-      fontId: 'architects-daughter',
-      fontSize: 18,
-      lineHeight: 28,
-      letterSpacing: 1,
-      inkColor: '#3f3f46',
-      paperType: 'grid',
-      showMarginLine: false,
-      showHoles: false,
-      holeType: 'none',
-      paddingLeft: 48,
-      paddingTop: 48
-    }
-  },
-  {
-    id: 'vintage-letter',
-    name: 'Vintage Letter',
-    description: 'Yellow parchment with Homemade Apple cursive script',
-    badge: 'Artisan',
-    settings: {
-      fontId: 'homemade-apple',
-      fontSize: 19,
-      lineHeight: 36,
-      letterSpacing: 0.5,
-      inkColor: '#0f2b5c',
-      paperType: 'vintage',
-      showMarginLine: false,
-      showHoles: false,
-      holeType: 'none',
-      paddingLeft: 56,
-      paddingTop: 54
-    }
-  },
-  {
-    id: 'clean-art-paper',
-    name: 'Plain White A4',
-    description: 'Textured ivory A4 art paper with classic fountain ink',
-    badge: 'Clean',
-    settings: {
-      fontId: 'caveat',
-      fontSize: 21,
-      lineHeight: 34,
-      letterSpacing: 0.3,
-      inkColor: '#0f2b5c',
-      paperType: 'blank',
-      showMarginLine: false,
-      showHoles: false,
-      holeType: 'none',
-      paddingLeft: 60,
-      paddingTop: 54
-    }
-  }
-];
-
 export const SAMPLE_TEXTS = {
+  college: `Physics 204: Quantum Mechanics & Wave Function Analysis
+Date: November 2nd | Hall B | Prof. Sterling
+
+I. The 1D Harmonic Oscillator
+The Hamiltonian for a one-dimensional quantum harmonic oscillator is:
+    H = p²/(2m) + (1/2)mω²x²
+
+Where:
+• m is the particle mass
+• ω is the natural angular frequency
+• x and p are position and momentum operators satisfying [x, p] = iħ
+
+II. Energy Eigenvalues & Zero-Point Energy
+Using ladder raising (a†) and lowering (a) operators:
+    E_n = ħω (n + 1/2),   for n = 0, 1, 2, ...
+
+Crucial observation: Even at ground state (n = 0), E_0 = (1/2)ħω > 0.
+This zero-point energy is required by the Heisenberg Uncertainty Principle! A quantum particle cannot sit stationary at the absolute bottom of a potential well.
+
+Assignment:
+- Complete problems 4.1 to 4.7 by Thursday 5 PM.
+- Read Griffiths Section 3.2 on Hilbert space projections.`,
+
+  letter: `Dearest Eleanor,
+
+I hope this letter finds you in peace and good spirits.
+
+The autumn air here has turned crisp and golden. As I sit by the window writing this, the maple leaves outside are drifting slowly to the cobblestones below. Life moves at an unrelenting pace in the city, but whenever I pick up pen and paper, the world gently decelerates.
+
+I was thinking back to our long conversation last winter by the harbor. You asked if I still believe that quiet craftsmanship can endure in a world enamored with quick shortcuts. The longer I observe, the more certain I become: genuine care and human warmth leave an indelible impression that mechanical speed can never duplicate.
+
+Please give my warmest regards to everyone. Write back when time permits; I always look forward to hearing your voice through your handwriting.
+
+Yours always,
+Julian`,
+
+  notes: `Daily Action Items & Brainstorming Notes
+Focus: InkScript Studio Launch & Design Polish
+
+1. Core Architecture Review:
+   • Verify that client-side PDF text extraction runs strictly in-memory.
+   • Ensure A4 auto-pagination splits text across pages without line clipping.
+   • Verify 300 DPI high-res export via jsPDF + html2canvas.
+
+2. Design & Humanization:
+   • Natural Handwriting Variance: +/- 0.4deg rotation and +/- 1px baseline shift.
+   • Subtle ink opacity fluctuation per word to emulate fountain pen flow.
+   • Ruled line alignment with dynamic line-height.
+
+3. Quick Decisions:
+   • Keep interface clean and distraction-free in dark slate.
+   • Support instant drag-and-drop font testing with .ttf, .otf, .woff.
+
+"Simplicity is the prerequisite for reliability." — Edsger W. Dijkstra`,
+
   essay: `The Architecture of Thought: Reflections on Modern Problem Solving
 
 Human intelligence is distinctly marked by our capacity to externalize thought through handwriting. When pen meets paper, the mechanical friction forces deliberate contemplation that digital keyboards often circumvent.
@@ -380,58 +335,95 @@ Key Observations:
 2. Cognitive Pacing: Writing by hand is roughly 3x slower than typing, affording the mind time to synthesize before commitment.
 3. Emotional Resonance: Handwritten notes convey intent, vulnerability, and human presence that sterile fonts cannot replicate.
 
-"We do not write in order to be understood; we write in order to understand." — C. Day Lewis`,
-
-  lecture: `Physics 204: Quantum Harmonic Oscillators & Wave Functions
-Date: November 2nd | Prof. Sterling | Hall B
-
-I. Basic Formulation
-The 1D harmonic oscillator Hamiltonian is governed by:
-   H = p²/(2m) + (1/2)mω²x²
-
-Where:
-• m is the particle mass
-• ω is the angular frequency of the oscillator
-• x and p are position and momentum operators with [x, p] = iħ
-
-II. Energy Eigenvalues
-By defining ladder operators (raising a† and lowering a):
-   E_n = ħω (n + 1/2), where n = 0, 1, 2, ...
-
-Notice that the ground state energy E_0 = (1/2)ħω is strictly positive!
-This zero-point energy is a direct consequence of Heisenberg's Uncertainty Principle. A particle cannot rest at the bottom of the potential well with zero kinetic energy without violating Δx·Δp ≥ ħ/2.
-
-Next Assignment:
-- Complete problem set 4 by Thursday 5 PM.
-- Read Griffiths Chapter 3 on Hilbert spaces.`,
-
-  recipe: `Grandmother's Sunday Cinnamon Sourdough Braided Loaf
-
-Ingredients:
-• 500g unbleached bread flour
-• 350ml warm filtered water (around 85°F)
-• 100g active sourdough starter (fed 4 hours prior)
-• 10g fine sea salt
-• Filling: 60g softened brown butter, 3 tbsp Ceylon cinnamon, 70g dark muscovado sugar
-
-Preparation Protocol:
-1. The Autolyse: Mix flour and warm water in an earthenware bowl. Let rest covered for 45 minutes to hydrate gluten.
-2. Ferment: Fold in the starter and salt until silky. Perform 4 sets of stretch-and-folds spaced 30 minutes apart.
-3. Bulk Rise: Allow dough to rise until aerated and increased in volume by ~75%.
-4. Shape & Cinnamon Layer: Gently stretch into a 12x18 inch rectangle. Brush with melted brown butter, dust heavily with cinnamon sugar, roll into a log and slice lengthwise to braid.
-5. Bake at 425°F in a preheated Dutch oven with lid on for 22 mins, remove lid and finish for 18 mins until deep mahogany crust develops.`,
-
-  reflection: `November 2nd — Late Night Journal Entry
-
-Quiet evening. Rain gently tapping against the study windowpane.
-
-It is easy to get caught in the velocity of life—deadlines, notifications, and endless tabs. Today I took an hour to disconnect and simply write down what actually matters right now:
-
-• Focus on craftsmanship over speed. Quality compounds silently.
-• Protect morning hours for creative synthesis before consuming news.
-• Be generous with encouragement; everyone is fighting their own quiet battle.
-
-Tomorrow's primary goal: Finish the ink converter application and ensure the handwriting preview feels indistinguishable from an actual notebook page.
-
-Good night world.`
+"We do not write in order to be understood; we write in order to understand." — C. Day Lewis`
 };
+
+export const PRESET_THEMES: PresetTheme[] = [
+  // 3 Primary Quick Action Presets Requested
+  {
+    id: 'college-assignment',
+    name: 'College Assignment',
+    description: 'Lined paper with Royal Blue ballpoint, red margin line, and natural handwriting variance',
+    badge: 'Academic',
+    settings: {
+      fontId: 'patrick-hand',
+      fontSize: 20,
+      lineHeight: 32,
+      letterSpacing: 0.5,
+      inkColor: '#1a365d', // Royal Blue Ballpoint
+      paperType: 'ruled',
+      showMarginLine: true,
+      marginLineColor: '#ef4444',
+      showHoles: true,
+      holeType: '3-hole',
+      naturalJitter: true,
+      paddingLeft: 84,
+      paddingTop: 54
+    },
+    sampleText: SAMPLE_TEXTS.college
+  },
+  {
+    id: 'personal-letter',
+    name: 'Personal Letter',
+    description: 'Warm yellow vintage parchment with Homemade Apple cursive script',
+    badge: 'Letter',
+    settings: {
+      fontId: 'homemade-apple',
+      fontSize: 20,
+      lineHeight: 36,
+      letterSpacing: 0.5,
+      inkColor: '#0f2b5c', // Classic Ink Pen
+      paperType: 'vintage',
+      showMarginLine: false,
+      showHoles: false,
+      holeType: 'none',
+      naturalJitter: true,
+      paddingLeft: 60,
+      paddingTop: 54
+    },
+    sampleText: SAMPLE_TEXTS.letter
+  },
+  {
+    id: 'quick-notes',
+    name: 'Quick Notes',
+    description: 'Plain White A4 paper with Gel Black ink and organic letter spacing',
+    badge: 'Notes',
+    settings: {
+      fontId: 'kalam',
+      fontSize: 19,
+      lineHeight: 30,
+      letterSpacing: 0.2,
+      inkColor: '#18181b', // Gel Black
+      paperType: 'blank',
+      showMarginLine: false,
+      showHoles: false,
+      holeType: 'none',
+      naturalJitter: true,
+      paddingLeft: 56,
+      paddingTop: 48
+    },
+    sampleText: SAMPLE_TEXTS.notes
+  },
+  // Additional Presets
+  {
+    id: 'architect-grid',
+    name: 'Architect Grid',
+    description: 'Graph paper with 2B pencil drafting lettering',
+    badge: 'Technical',
+    settings: {
+      fontId: 'architects-daughter',
+      fontSize: 18,
+      lineHeight: 28,
+      letterSpacing: 1,
+      inkColor: '#3f3f46', // Pencil Graphite
+      paperType: 'grid',
+      showMarginLine: false,
+      showHoles: false,
+      holeType: 'none',
+      naturalJitter: true,
+      paddingLeft: 48,
+      paddingTop: 48
+    },
+    sampleText: SAMPLE_TEXTS.essay
+  }
+];
