@@ -6,7 +6,9 @@ import {
   ZoomOut,
   Maximize2,
   Layers,
-  FileText
+  FileText,
+  FileCheck2,
+  ScrollText
 } from 'lucide-react';
 import type { HandwritingSettings, CustomFontInfo } from '../types';
 import { HANDWRITING_FONTS, PAPER_STYLES } from '../constants/presets';
@@ -38,26 +40,37 @@ export function PaperPreview({
 
   // Dynamic Font Selection: Custom Uploaded Font -> or Fallback to Built-in Google Web Fonts
   const activeFontFamily = useMemo(() => {
-    // 1. Check if user selected an uploaded custom font
     const custom = customFonts.find((f) => f.id === settings.fontId);
-    if (custom) {
-      return custom.fontFamily;
-    }
-
-    // 2. Fall back to selected Google Font (Caveat, Kalam, Homemade Apple, etc.)
+    if (custom) return custom.fontFamily;
     const preset = HANDWRITING_FONTS.find((f) => f.id === settings.fontId);
     return preset ? preset.fontFamily : "'Caveat', cursive";
   }, [settings.fontId, customFonts]);
 
-  // Paginate text dynamically based on current line-height and page height
+  // Dynamically calculate text height and paginate across A4 sheets
   const pages = useMemo(() => {
     return paginateText(text, {
       lineHeight: settings.lineHeight,
+      fontSize: settings.fontSize,
+      fontFamily: activeFontFamily,
+      pageWidth: 794,
       pageHeight: 1123,
       paddingTop: settings.paddingTop,
-      paddingBottom: settings.paddingBottom
+      paddingBottom: settings.paddingBottom,
+      paddingLeft: settings.paddingLeft,
+      paddingRight: settings.paddingRight,
+      letterSpacing: settings.letterSpacing
     });
-  }, [text, settings.lineHeight, settings.paddingTop, settings.paddingBottom]);
+  }, [
+    text,
+    settings.lineHeight,
+    settings.fontSize,
+    activeFontFamily,
+    settings.paddingTop,
+    settings.paddingBottom,
+    settings.paddingLeft,
+    settings.paddingRight,
+    settings.letterSpacing
+  ]);
 
   const totalPages = Math.max(1, pages.length);
   const safeCurrentPage = Math.min(Math.max(1, currentPage), totalPages);
@@ -71,7 +84,7 @@ export function PaperPreview({
     };
 
     if (settings.paperType === 'ruled' || settings.paperType === 'college-ruled' || settings.paperType === 'legal-pad') {
-      // Synchronize the ruling line directly with the lineHeight so text lines rest directly on the lines
+      // Synchronize ruling lines with line-height and top margin padding
       bgStyles.backgroundImage = `linear-gradient(to bottom, transparent calc(${settings.lineHeight}px - 1px), ${paperConfig.lineColor} calc(${settings.lineHeight}px - 1px), ${paperConfig.lineColor} ${settings.lineHeight}px)`;
       bgStyles.backgroundSize = `100% ${settings.lineHeight}px`;
       bgStyles.backgroundPosition = `0 ${settings.paddingTop - 6}px`;
@@ -100,12 +113,12 @@ export function PaperPreview({
     return bgStyles;
   };
 
-  // Render text lines with optional micro-jitter for organic realism
+  // Render text lines with natural organic micro-jitter
   const renderHandwrittenContent = (pageContent: string) => {
     if (!pageContent.trim()) {
       return (
         <div className="italic text-slate-400 select-none opacity-40">
-          Start typing in the editor to see your handwritten notes appear here...
+          Start typing or paste text in the editor to see your handwritten notes appear here...
         </div>
       );
     }
@@ -113,7 +126,7 @@ export function PaperPreview({
     const lines = pageContent.split('\n');
 
     return lines.map((line, lineIdx) => {
-      // Deterministic slight angle rotation based on line index and text length
+      // Deterministic slight angle rotation for natural variance
       const pseudoRandomAngle = settings.naturalJitter
         ? ((lineIdx * 7 + line.length * 3) % 7 - 3) * 0.12
         : 0;
@@ -131,7 +144,6 @@ export function PaperPreview({
           }}
         >
           {words.map((word, wordIdx) => {
-            // Subtle baseline wiggle on individual words if jitter is enabled
             const wordWiggleY = settings.naturalJitter
               ? ((lineIdx * 13 + wordIdx * 17) % 5 - 2) * 0.35
               : 0;
@@ -155,7 +167,7 @@ export function PaperPreview({
     });
   };
 
-  // Render a single A4 paper sheet
+  // Render a single A4 paper sheet (standard 794px x 1123px)
   const renderPaperSheet = (pageIndex: number, pageContent: string) => {
     const marginLineLeft = settings.marginOffset > 0 ? settings.marginOffset : Math.max(20, settings.paddingLeft - 16);
 
@@ -166,6 +178,7 @@ export function PaperPreview({
           if (el) pageRefs.current.set(pageIndex, el);
           else pageRefs.current.delete(pageIndex);
         }}
+        data-page-index={pageIndex}
         className="relative mx-auto bg-white notebook-sheet-shadow overflow-hidden transition-all duration-300 print:shadow-none print:m-0"
         style={{
           // Standard A4 dimensions in px at 96 DPI: 794px width x 1123px height
@@ -226,7 +239,7 @@ export function PaperPreview({
             opacity: 0.65
           }}
         >
-          p. {pageIndex + 1}
+          Page {pageIndex + 1} of {totalPages}
         </div>
 
         {/* Main Handwritten Text Body */}
@@ -255,7 +268,7 @@ export function PaperPreview({
     <div className="flex flex-col h-full bg-slate-950/40 rounded-2xl border border-slate-800 overflow-hidden">
       {/* Top Preview Controls Bar */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 bg-slate-900/80 px-4 py-2.5 backdrop-blur-sm">
-        {/* Page navigation */}
+        {/* Page navigation controls */}
         <div className="flex items-center gap-2">
           <button
             type="button"
@@ -269,7 +282,7 @@ export function PaperPreview({
 
           <span className="text-xs font-medium text-slate-300">
             {viewMode === 'all' ? (
-              <span>All {totalPages} Pages</span>
+              <span>Continuous Scroll ({totalPages} pages)</span>
             ) : (
               <span>
                 Page <strong className="text-white">{safeCurrentPage}</strong> of{' '}
@@ -300,16 +313,17 @@ export function PaperPreview({
                 ? 'border-blue-500/50 bg-blue-500/20 text-blue-300'
                 : 'border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700'
             }`}
+            title="Switch between single page view and continuous vertical scroll"
           >
             {viewMode === 'all' ? (
               <>
                 <FileText className="h-3.5 w-3.5" />
-                <span>Single</span>
+                <span>Single View</span>
               </>
             ) : (
               <>
-                <Layers className="h-3.5 w-3.5" />
-                <span>All Pages</span>
+                <ScrollText className="h-3.5 w-3.5" />
+                <span>Continuous Scroll</span>
               </>
             )}
           </button>
@@ -350,6 +364,46 @@ export function PaperPreview({
         </div>
       </div>
 
+      {/* Page Thumbnails Bar (When 2 or more pages exist) */}
+      {totalPages > 1 && (
+        <div className="flex items-center gap-2 border-b border-slate-800 bg-slate-900/40 px-4 py-2 overflow-x-auto scrollbar-thin">
+          <span className="text-[11px] font-semibold text-slate-400 shrink-0 mr-1 flex items-center gap-1">
+            <Layers className="h-3 w-3 text-blue-400" /> Pages:
+          </span>
+          {pages.map((pText, idx) => {
+            const pageNum = idx + 1;
+            const isSelected = viewMode === 'single' && safeCurrentPage === pageNum;
+
+            return (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => {
+                  onPageChange(pageNum);
+                  if (viewMode === 'all') {
+                    // Scroll to that page in continuous view
+                    const pageEl = pageRefs.current.get(idx);
+                    pageEl?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }}
+                className={`group flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs transition shrink-0 ${
+                  isSelected
+                    ? 'border-blue-500 bg-blue-500/20 text-blue-200 font-semibold shadow'
+                    : 'border-slate-800 bg-slate-800/60 text-slate-400 hover:border-slate-700 hover:text-slate-200'
+                }`}
+                title={`Jump to Page ${pageNum}`}
+              >
+                <FileCheck2 className="h-3.5 w-3.5 text-blue-400" />
+                <span>Page {pageNum}</span>
+                <span className="text-[10px] text-slate-500 font-mono">
+                  ({pText.split('\n').filter(Boolean).length} lines)
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
       {/* Scrollable Paper Canvas Container */}
       <div
         ref={containerRef}
@@ -363,11 +417,85 @@ export function PaperPreview({
           }}
         >
           {viewMode === 'all' ? (
-            pages.map((pageContent, idx) => renderPaperSheet(idx, pageContent))
+            // Continuous Vertical Scroll: Render all pages stacked
+            pages.map((pageContent, idx) => (
+              <div key={idx} className="relative group">
+                <div className="absolute -top-6 left-2 text-[11px] font-semibold text-slate-400 bg-slate-900/80 px-2 py-0.5 rounded border border-slate-800 select-none">
+                  Page {idx + 1} of {totalPages}
+                </div>
+                {renderPaperSheet(idx, pageContent)}
+              </div>
+            ))
           ) : (
+            // Single Page View
             renderPaperSheet(safeCurrentPage - 1, pages[safeCurrentPage - 1] || '')
           )}
         </div>
+      </div>
+
+      {/* Hidden Offscreen Export Stage (Ensures all pages are always available for html2canvas multi-page export) */}
+      <div
+        aria-hidden="true"
+        className="absolute -left-[9999px] -top-[9999px] pointer-events-none opacity-0"
+      >
+        {pages.map((pageContent, idx) => (
+          <div
+            key={`export-${idx}`}
+            ref={(el) => {
+              if (el) pageRefs.current.set(idx, el);
+            }}
+            style={{
+              width: '794px',
+              minHeight: '1123px',
+              ...getPaperBackgroundStyle()
+            }}
+            className="bg-white"
+          >
+            {/* Red Left Margin Line */}
+            {settings.showMarginLine && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  bottom: 0,
+                  left: `${settings.marginOffset > 0 ? settings.marginOffset : Math.max(20, settings.paddingLeft - 16)}px`,
+                  width: '2px',
+                  backgroundColor: settings.marginLineColor
+                }}
+              />
+            )}
+            {/* Page number */}
+            <div
+              style={{
+                position: 'absolute',
+                top: '16px',
+                right: '32px',
+                fontSize: '12px',
+                fontFamily: 'monospace',
+                color: '#94a3b8'
+              }}
+            >
+              Page {idx + 1} of {totalPages}
+            </div>
+            {/* Text Content */}
+            <div
+              style={{
+                fontFamily: activeFontFamily,
+                fontSize: `${settings.fontSize}px`,
+                letterSpacing: `${settings.letterSpacing}px`,
+                color: settings.inkColor,
+                opacity: settings.inkOpacity,
+                fontWeight: settings.fontWeight,
+                paddingTop: `${settings.paddingTop}px`,
+                paddingBottom: `${settings.paddingBottom}px`,
+                paddingLeft: `${settings.paddingLeft}px`,
+                paddingRight: `${settings.paddingRight}px`
+              }}
+            >
+              {renderHandwrittenContent(pageContent)}
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Bottom status bar */}
@@ -376,7 +504,7 @@ export function PaperPreview({
           Paper: <strong className="text-slate-300">{paperConfig.name}</strong> • Font: <strong className="text-slate-300">{activeFontFamily.split(',')[0].replace(/['"]/g, '')}</strong>
         </div>
         <div className="font-mono">
-          A4 Standard (210 × 297mm)
+          A4 Standard (210 × 297mm) • Scale 300DPI
         </div>
       </div>
     </div>

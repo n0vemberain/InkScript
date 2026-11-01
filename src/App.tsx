@@ -3,7 +3,9 @@ import {
   FileText,
   Sliders,
   Type,
-  CheckCircle2
+  CheckCircle2,
+  FileDown,
+  Sparkles
 } from 'lucide-react';
 import { Navbar } from './components/Navbar';
 import { UploadTextTab } from './components/UploadTextTab';
@@ -36,15 +38,31 @@ export function App() {
   // Page DOM references for html2canvas export
   const pageRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 
-  // Calculated total pages
+  // Dynamic pagination based on line height and page geometry
   const pages = useMemo(() => {
     return paginateText(text, {
       lineHeight: settings.lineHeight,
+      fontSize: settings.fontSize,
+      fontFamily: settings.fontId,
       pageHeight: 1123,
+      pageWidth: 794,
       paddingTop: settings.paddingTop,
-      paddingBottom: settings.paddingBottom
+      paddingBottom: settings.paddingBottom,
+      paddingLeft: settings.paddingLeft,
+      paddingRight: settings.paddingRight,
+      letterSpacing: settings.letterSpacing
     });
-  }, [text, settings.lineHeight, settings.paddingTop, settings.paddingBottom]);
+  }, [
+    text,
+    settings.lineHeight,
+    settings.fontSize,
+    settings.fontId,
+    settings.paddingTop,
+    settings.paddingBottom,
+    settings.paddingLeft,
+    settings.paddingRight,
+    settings.letterSpacing
+  ]);
 
   const totalPages = Math.max(1, pages.length);
 
@@ -88,17 +106,15 @@ export function App() {
     window.print();
   };
 
-  // High-res PDF export
+  // High-res PDF export (scale: 3 for crisp 300 DPI print quality)
   const handleExportPdf = async () => {
     try {
       setIsExportingPdf(true);
-      setExportProgress(10);
-      setExportStatusText('Preparing pages for rendering...');
+      setExportProgress(5);
+      setExportStatusText('Initializing high-resolution PDF renderer...');
 
-      // Temporarily ensure all pages are rendered if currently in single page mode
+      // Collect all page elements (0 to totalPages - 1)
       const elementsToExport: HTMLElement[] = [];
-
-      // Collect available page elements
       for (let i = 0; i < totalPages; i++) {
         const el = pageRefs.current.get(i);
         if (el) {
@@ -106,14 +122,11 @@ export function App() {
         }
       }
 
-      // If we are in single page view and user only has active page DOM element,
-      // switch to 'all' briefly to capture all pages
-      if (elementsToExport.length < totalPages && viewMode === 'single') {
-        setViewMode('all');
-        setExportStatusText('Rendering all pages...');
-        // Allow React DOM to paint the pages
-        await new Promise((resolve) => setTimeout(resolve, 350));
-        
+      // If any page is not yet mounted, give DOM a brief tick
+      if (elementsToExport.length < totalPages) {
+        setExportStatusText(`Preparing ${totalPages} pages for capture...`);
+        await new Promise((resolve) => setTimeout(resolve, 200));
+
         elementsToExport.length = 0;
         for (let i = 0; i < totalPages; i++) {
           const el = pageRefs.current.get(i);
@@ -122,7 +135,8 @@ export function App() {
       }
 
       await exportElementsToPdf(elementsToExport, {
-        filename: 'InkScript-Handwritten-Notes.pdf',
+        filename: `InkScript-Notes-${new Date().toISOString().slice(0, 10)}.pdf`,
+        scale: 3, // High DPI: 300 DPI crisp print quality
         onProgress: (progress, statusText) => {
           setExportProgress(progress);
           setExportStatusText(statusText);
@@ -132,14 +146,16 @@ export function App() {
       console.error('Export PDF failed:', err);
       alert('Failed to generate PDF. Please try again.');
     } finally {
-      setIsExportingPdf(false);
-      setExportProgress(0);
-      setExportStatusText('');
+      setTimeout(() => {
+        setIsExportingPdf(false);
+        setExportProgress(0);
+        setExportStatusText('');
+      }, 600);
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col relative">
       {/* Top Navigation Bar */}
       <Navbar
         onReset={handleReset}
@@ -244,7 +260,7 @@ export function App() {
               <span className="flex items-center gap-1.5">
                 <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" /> Auto-sync enabled
               </span>
-              <span>
+              <span className="font-medium text-slate-400">
                 {totalPages} {totalPages === 1 ? 'handwritten page' : 'handwritten pages'} generated
               </span>
             </div>
@@ -266,6 +282,51 @@ export function App() {
 
         </div>
       </main>
+
+      {/* Floating Modal Progress Indicator during PDF Export */}
+      {isExportingPdf && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="w-full max-w-md rounded-2xl border border-slate-700 bg-slate-900 p-6 shadow-2xl space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400">
+                <FileDown className="h-6 w-6 animate-bounce" />
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-white flex items-center gap-1.5">
+                  Generating High-Res PDF
+                  <span className="rounded bg-blue-500/20 px-1.5 py-0.2 text-[10px] text-blue-300">
+                    300 DPI
+                  </span>
+                </h3>
+                <p className="text-xs text-slate-400">
+                  Compiling {totalPages} {totalPages === 1 ? 'page' : 'pages'} with scale factor 3.0
+                </p>
+              </div>
+            </div>
+
+            {/* Progress bar */}
+            <div className="space-y-1.5">
+              <div className="flex justify-between text-xs font-mono">
+                <span className="text-blue-400 font-medium">{exportStatusText}</span>
+                <span className="text-slate-300">{exportProgress}%</span>
+              </div>
+              <div className="h-2 w-full overflow-hidden rounded-full bg-slate-800 ring-1 ring-slate-700">
+                <div
+                  className="h-full bg-gradient-to-r from-blue-600 via-indigo-500 to-cyan-400 transition-all duration-300"
+                  style={{ width: `${exportProgress}%` }}
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1 border-t border-slate-800">
+              <span className="flex items-center gap-1">
+                <Sparkles className="h-3 w-3 text-amber-400" /> Print-ready vector rendering
+              </span>
+              <span>jsPDF + html2canvas</span>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

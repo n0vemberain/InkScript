@@ -1,14 +1,42 @@
 export interface SplitTextOptions {
   lineHeight: number;
-  pageHeight?: number; // default A4 pixel height ~1123
+  fontSize?: number;
+  fontFamily?: string;
+  pageWidth?: number; // default A4 width: 794px
+  pageHeight?: number; // default A4 height: 1123px
   paddingTop?: number;
   paddingBottom?: number;
+  paddingLeft?: number;
+  paddingRight?: number;
+  letterSpacing?: number;
+}
+
+let measurementCanvas: HTMLCanvasElement | null = null;
+
+function getWordWidth(word: string, fontSize: number, fontFamily: string, letterSpacing: number = 0): number {
+  if (typeof document !== 'undefined') {
+    try {
+      if (!measurementCanvas) {
+        measurementCanvas = document.createElement('canvas');
+      }
+      const ctx = measurementCanvas.getContext('2d');
+      if (ctx) {
+        ctx.font = `500 ${fontSize}px ${fontFamily}`;
+        const measured = ctx.measureText(word).width;
+        const spacingExtra = word.length * Math.max(0, letterSpacing);
+        return measured + spacingExtra;
+      }
+    } catch {
+      // Fallback below
+    }
+  }
+  // Heuristic average character width for handwriting glyphs
+  return word.length * (fontSize * 0.44 + Math.max(0, letterSpacing));
 }
 
 /**
- * Splits text into discrete pages suited for A4 notebook paper.
- * Supports explicit page breaks '--- Page Break ---' as well as
- * line-count based pagination.
+ * Dynamically calculates text height and wraps lines to accurately
+ * paginate text across discrete A4 notebook pages.
  */
 export function paginateText(
   rawText: string,
@@ -20,96 +48,103 @@ export function paginateText(
 
   const {
     lineHeight,
+    fontSize = 20,
+    fontFamily = "'Caveat', cursive",
+    pageWidth = 794,
     pageHeight = 1123,
     paddingTop = 54,
-    paddingBottom = 48
+    paddingBottom = 48,
+    paddingLeft = 84,
+    paddingRight = 48,
+    letterSpacing = 0.5
   } = options;
 
-  // Approximate maximum lines per page based on line-height and printable area
-  const availableHeight = Math.max(300, pageHeight - paddingTop - paddingBottom);
-  const maxLinesPerPage = Math.max(12, Math.floor(availableHeight / lineHeight));
+  // Available dimensions for handwritten text
+  const usableWidth = Math.max(280, pageWidth - paddingLeft - paddingRight);
+  const usableHeight = Math.max(300, pageHeight - paddingTop - paddingBottom);
+  
+  // Maximum lines that fit vertically on one A4 paper sheet
+  const maxLinesPerPage = Math.max(10, Math.floor(usableHeight / lineHeight));
 
-  // Check if explicit page breaks exist from PDF import
-  if (rawText.includes('--- Page Break ---')) {
-    const rawPages = rawText.split(/--- Page Break ---/);
-    const result: string[] = [];
-    for (const p of rawPages) {
-      const trimmed = p.trim();
-      if (trimmed) {
-        // If a single page from PDF has too many lines, break it further
-        const subPages = paginateByLines(trimmed, maxLinesPerPage);
-        result.push(...subPages);
+  // Check for explicit page breaks '--- Page Break ---'
+  const rawSections = rawText.split(/(?:--- Page Break ---|--- page break ---)/);
+  const finalPages: string[] = [];
+
+  for (const section of rawSections) {
+    const trimmedSection = section.trim();
+    if (!trimmedSection) continue;
+
+    // Split section into paragraphs
+    const paragraphs = section.split('\n');
+    let currentLines: string[] = [];
+    let currentLineCount = 0;
+
+    for (let pIdx = 0; pIdx < paragraphs.length; pIdx++) {
+      const para = paragraphs[pIdx];
+
+      // Empty line / paragraph spacing
+      if (para.trim() === '') {
+        if (currentLineCount + 1 >= maxLinesPerPage && currentLines.length > 0) {
+          finalPages.push(currentLines.join('\n'));
+          currentLines = [];
+          currentLineCount = 0;
+        } else {
+          currentLines.push('');
+          currentLineCount += 1;
+        }
+        continue;
       }
-    }
-    return result.length > 0 ? result : [''];
-  }
 
-  return paginateByLines(rawText, maxLinesPerPage);
-}
+      // Break paragraph into wrapped lines based on usable width
+      const words = para.split(/\s+/).filter(Boolean);
+      let activeLineWords: string[] = [];
+      let activeLineWidth = 0;
+      const spaceWidth = getWordWidth(' ', fontSize, fontFamily, letterSpacing);
 
-function paginateByLines(text: string, maxLinesPerPage: number): string[] {
-  const paragraphs = text.split('\n');
-  const pages: string[] = [];
-  let currentLines: string[] = [];
-  let currentEstimatedLineCount = 0;
+      for (let wIdx = 0; wIdx < words.length; wIdx++) {
+        const word = words[wIdx];
+        const wordWidth = getWordWidth(word, fontSize, fontFamily, letterSpacing);
 
-  for (const para of paragraphs) {
-    // Empty line counts as 1 line of vertical space
-    if (para.trim() === '') {
-      if (currentEstimatedLineCount + 1 > maxLinesPerPage && currentLines.length > 0) {
-        pages.push(currentLines.join('\n'));
-        currentLines = [];
-        currentEstimatedLineCount = 0;
-      } else {
-        currentLines.push('');
-        currentEstimatedLineCount += 1;
-      }
-      continue;
-    }
+        if (activeLineWords.length === 0) {
+          activeLineWords.push(word);
+          activeLineWidth = wordWidth;
+        } else if (activeLineWidth + spaceWidth + wordWidth <= usableWidth) {
+          activeLineWords.push(word);
+          activeLineWidth += spaceWidth + wordWidth;
+        } else {
+          // Current line filled, push to current page
+          const completedLine = activeLineWords.join(' ');
+          currentLines.push(completedLine);
+          currentLineCount += 1;
 
-    // Estimate number of wrapped lines for this paragraph
-    // At ~60-70 characters per line in A4 ruled margins
-    const approxCharsPerLine = 60;
-    const estimatedWrappedLines = Math.max(1, Math.ceil(para.length / approxCharsPerLine));
-
-    if (currentEstimatedLineCount + estimatedWrappedLines > maxLinesPerPage && currentLines.length > 0) {
-      // If paragraph itself is huge, break it into chunks
-      if (estimatedWrappedLines > maxLinesPerPage) {
-        const words = para.split(' ');
-        let tempLine = '';
-        for (const w of words) {
-          if ((tempLine + ' ' + w).length > approxCharsPerLine) {
-            currentLines.push(tempLine);
-            currentEstimatedLineCount += 1;
-            tempLine = w;
-
-            if (currentEstimatedLineCount >= maxLinesPerPage) {
-              pages.push(currentLines.join('\n'));
-              currentLines = [];
-              currentEstimatedLineCount = 0;
-            }
-          } else {
-            tempLine = tempLine ? `${tempLine} ${w}` : w;
+          // Check vertical boundary of A4 sheet
+          if (currentLineCount >= maxLinesPerPage) {
+            finalPages.push(currentLines.join('\n'));
+            currentLines = [];
+            currentLineCount = 0;
           }
+
+          activeLineWords = [word];
+          activeLineWidth = wordWidth;
         }
-        if (tempLine) {
-          currentLines.push(tempLine);
-          currentEstimatedLineCount += 1;
-        }
-      } else {
-        pages.push(currentLines.join('\n'));
-        currentLines = [para];
-        currentEstimatedLineCount = estimatedWrappedLines;
       }
-    } else {
-      currentLines.push(para);
-      currentEstimatedLineCount += estimatedWrappedLines;
+
+      if (activeLineWords.length > 0) {
+        currentLines.push(activeLineWords.join(' '));
+        currentLineCount += 1;
+
+        if (currentLineCount >= maxLinesPerPage && pIdx < paragraphs.length - 1) {
+          finalPages.push(currentLines.join('\n'));
+          currentLines = [];
+          currentLineCount = 0;
+        }
+      }
+    }
+
+    if (currentLines.length > 0) {
+      finalPages.push(currentLines.join('\n'));
     }
   }
 
-  if (currentLines.length > 0) {
-    pages.push(currentLines.join('\n'));
-  }
-
-  return pages.length > 0 ? pages : [''];
+  return finalPages.length > 0 ? finalPages : [''];
 }

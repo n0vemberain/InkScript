@@ -3,23 +3,28 @@ import html2canvas from 'html2canvas';
 
 export interface ExportPdfOptions {
   filename?: string;
+  scale?: number; // High DPI scale factor (default: 3 for crisp 300 DPI print quality)
   onProgress?: (progress: number, statusText: string) => void;
 }
 
 /**
- * Exports one or more HTML page elements to a high-resolution A4 PDF document.
+ * Exports one or more HTML page elements into a single multi-page high-resolution A4 PDF document.
  */
 export async function exportElementsToPdf(
   elements: HTMLElement[],
   options?: ExportPdfOptions
 ): Promise<void> {
-  const { filename = 'InkScript-Handwritten-Notes.pdf', onProgress } = options || {};
+  const {
+    filename = 'InkScript-Handwritten-Notes.pdf',
+    scale = 3,
+    onProgress
+  } = options || {};
 
   if (!elements || elements.length === 0) {
     throw new Error('No pages available to export.');
   }
 
-  // Create jsPDF instance in A4 portrait format
+  // Create jsPDF instance in A4 portrait format (210mm x 297mm)
   const pdf = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
@@ -33,23 +38,28 @@ export async function exportElementsToPdf(
     const el = elements[i];
 
     if (onProgress) {
-      const stepPercent = Math.round(((i) / total) * 90);
-      onProgress(stepPercent, `Rendering handwritten page ${i + 1} of ${total}...`);
+      const stepPercent = Math.round((i / total) * 90);
+      onProgress(stepPercent, `Rendering Page ${i + 1} of ${total}...`);
     }
 
-    // Capture using html2canvas with high scale for 300DPI-like crisp text
+    // Capture using html2canvas with high scale (3x) for ultra-sharp 300DPI text
     const canvas = await html2canvas(el, {
-      scale: 2.5,
+      scale: scale,
       useCORS: true,
       allowTaint: true,
       backgroundColor: null,
       logging: false,
-      windowWidth: el.scrollWidth,
-      windowHeight: el.scrollHeight
+      onclone: (_clonedDoc, clonedElement) => {
+        // Strip zoom scaling, outer margins and box shadows for clean print output
+        clonedElement.style.transform = 'none';
+        clonedElement.style.margin = '0';
+        clonedElement.style.boxShadow = 'none';
+        clonedElement.style.borderRadius = '0';
+      }
     });
 
-    // JPEG at 95% quality for excellent visual fidelity with reasonable size
-    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+    // JPEG at 96% quality for high visual fidelity
+    const imgData = canvas.toDataURL('image/jpeg', 0.96);
 
     if (i > 0) {
       pdf.addPage('a4', 'portrait');
@@ -60,15 +70,15 @@ export async function exportElementsToPdf(
   }
 
   if (onProgress) {
-    onProgress(95, 'Finalizing PDF document...');
+    onProgress(95, 'Compiling and saving multi-page PDF document...');
   }
 
-  // Short delay so user perceives the completion
-  await new Promise((resolve) => setTimeout(resolve, 200));
+  // Brief pause for browser rendering
+  await new Promise((resolve) => setTimeout(resolve, 250));
 
   pdf.save(filename);
 
   if (onProgress) {
-    onProgress(100, 'Download complete!');
+    onProgress(100, `Successfully downloaded ${total} ${total === 1 ? 'page' : 'pages'}!`);
   }
 }
