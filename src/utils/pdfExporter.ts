@@ -49,7 +49,15 @@ export async function exportElementsToPdf(
       allowTaint: true,
       backgroundColor: null,
       logging: false,
-      onclone: (_clonedDoc, clonedElement) => {
+      onclone: (clonedDoc, clonedElement) => {
+        const exportContainer = clonedDoc.getElementById('inkscript-export-container');
+        if (exportContainer) {
+          exportContainer.style.opacity = '1';
+          exportContainer.style.position = 'static';
+          exportContainer.style.left = '0';
+          exportContainer.style.top = '0';
+          exportContainer.style.zIndex = '1';
+        }
         // Strip zoom scaling, outer margins and box shadows for clean print output
         clonedElement.style.position = 'static';
         clonedElement.style.left = '0';
@@ -65,6 +73,10 @@ export async function exportElementsToPdf(
 
     // JPEG at 96% quality for high visual fidelity
     const imgData = canvas.toDataURL('image/jpeg', 0.96);
+
+    // Free canvas GPU memory
+    canvas.width = 0;
+    canvas.height = 0;
 
     if (i > 0) {
       pdf.addPage('a4', 'portrait');

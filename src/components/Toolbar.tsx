@@ -39,12 +39,17 @@ export function Toolbar({
   viewMode,
   onToggleViewMode,
   totalPages,
+  settings,
 }: ToolbarProps) {
   const [showPresetsMenu, setShowPresetsMenu] = useState(false);
 
   const collegePreset = PRESET_THEMES.find(p => p.id === 'college-assignment') || PRESET_THEMES[0];
   const letterPreset = PRESET_THEMES.find(p => p.id === 'personal-letter') || PRESET_THEMES[1];
   const notesPreset = PRESET_THEMES.find(p => p.id === 'quick-notes') || PRESET_THEMES[2];
+
+  const isCollegeActive = settings.paperType === 'ruled' && settings.inkColor.toLowerCase() === '#1a365d';
+  const isLetterActive = settings.paperType === 'vintage';
+  const isNotesActive = settings.paperType === 'blank' && settings.inkColor.toLowerCase() === '#18181b';
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-slate-800 bg-slate-900/90 backdrop-blur-md">
@@ -79,7 +84,11 @@ export function Toolbar({
           <button
             type="button"
             onClick={() => onApplyPreset(collegePreset)}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-700/80 bg-slate-800/70 px-2.5 py-1 text-xs font-medium text-slate-300 hover:border-blue-500 hover:text-white transition"
+            className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-medium transition ${
+              isCollegeActive
+                ? 'border-blue-500 bg-blue-500/20 text-blue-200 shadow-sm'
+                : 'border-slate-700/80 bg-slate-800/70 text-slate-300 hover:border-blue-500 hover:text-white'
+            }`}
             title="College Assignment: Lined paper with royal blue ink & margin"
           >
             <GraduationCap className="h-3.5 w-3.5 text-blue-400" />
@@ -89,7 +98,11 @@ export function Toolbar({
           <button
             type="button"
             onClick={() => onApplyPreset(letterPreset)}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-700/80 bg-slate-800/70 px-2.5 py-1 text-xs font-medium text-slate-300 hover:border-amber-500 hover:text-white transition"
+            className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-medium transition ${
+              isLetterActive
+                ? 'border-amber-500 bg-amber-500/20 text-amber-200 shadow-sm'
+                : 'border-slate-700/80 bg-slate-800/70 text-slate-300 hover:border-amber-500 hover:text-white'
+            }`}
             title="Personal Letter: Vintage parchment with cursive script"
           >
             <Mail className="h-3.5 w-3.5 text-amber-400" />
@@ -99,7 +112,11 @@ export function Toolbar({
           <button
             type="button"
             onClick={() => onApplyPreset(notesPreset)}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-700/80 bg-slate-800/70 px-2.5 py-1 text-xs font-medium text-slate-300 hover:border-emerald-500 hover:text-white transition"
+            className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-medium transition ${
+              isNotesActive
+                ? 'border-emerald-500 bg-emerald-500/20 text-emerald-200 shadow-sm'
+                : 'border-slate-700/80 bg-slate-800/70 text-slate-300 hover:border-emerald-500 hover:text-white'
+            }`}
             title="Quick Notes: Plain White A4 with gel black ink"
           >
             <StickyNote className="h-3.5 w-3.5 text-emerald-400" />

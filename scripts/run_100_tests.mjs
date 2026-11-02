@@ -54,7 +54,11 @@ async function runTestSuite() {
       if (isPdf) {
         // PDF Test
         const data = new Uint8Array(fs.readFileSync(filePath));
-        const loadingTask = pdfjsLib.getDocument({ data });
+        const standardFontDataUrl = path.join(rootDir, 'node_modules/pdfjs-dist/standard_fonts/') + '/';
+        const loadingTask = pdfjsLib.getDocument({
+          data,
+          standardFontDataUrl
+        });
         const doc = await loadingTask.promise;
         let pdfText = '';
         for (let p = 1; p <= doc.numPages; p++) {

@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo } from 'react';
+import { useState, useRef, useMemo, useEffect } from 'react';
 import {
   FileText,
   Sliders,
@@ -12,7 +12,7 @@ import { PdfConverter } from './components/PdfConverter';
 import { StylePanel } from './components/StylePanel';
 import { FontUploader } from './components/FontUploader';
 import { PaperPreview } from './components/PaperPreview';
-import { DEFAULT_SETTINGS, SAMPLE_TEXTS } from './constants/presets';
+import { DEFAULT_SETTINGS, SAMPLE_TEXTS, HANDWRITING_FONTS } from './constants/presets';
 import type { CustomFontInfo, HandwritingSettings, PresetTheme } from './types';
 import { exportElementsToPdf } from './utils/pdfExporter';
 import { paginateText } from './utils/pagination';
@@ -23,6 +23,16 @@ export function App() {
   const [settings, setSettings] = useState<HandwritingSettings>(DEFAULT_SETTINGS);
   const [customFonts, setCustomFonts] = useState<CustomFontInfo[]>([]);
   const [activeTab, setActiveTab] = useState<'editor' | 'style' | 'custom-font'>('editor');
+  const [fontsReady, setFontsReady] = useState<boolean>(false);
+
+  // Monitor web font readiness
+  useEffect(() => {
+    if (typeof document !== 'undefined' && (document as any).fonts) {
+      (document as any).fonts.ready.then(() => {
+        setFontsReady(true);
+      });
+    }
+  }, []);
   
   // Navigation & preview state
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -38,12 +48,21 @@ export function App() {
   // Page DOM references for html2canvas export
   const pageRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 
+  // Active CSS font family (matches custom fonts or Google Fonts presets)
+  const activeFontFamily = useMemo(() => {
+    const custom = customFonts.find((f) => f.id === settings.fontId);
+    if (custom) return custom.fontFamily;
+    const preset = HANDWRITING_FONTS.find((f) => f.id === settings.fontId);
+    return preset ? preset.fontFamily : "'Caveat', cursive";
+  }, [settings.fontId, customFonts]);
+
   // Dynamic pagination based on line height and page geometry
   const pages = useMemo(() => {
+    void fontsReady;
     return paginateText(text, {
       lineHeight: settings.lineHeight,
       fontSize: settings.fontSize,
-      fontFamily: settings.fontId,
+      fontFamily: activeFontFamily,
       pageHeight: 1123,
       pageWidth: 794,
       paddingTop: settings.paddingTop,
@@ -56,12 +75,13 @@ export function App() {
     text,
     settings.lineHeight,
     settings.fontSize,
-    settings.fontId,
+    activeFontFamily,
     settings.paddingTop,
     settings.paddingBottom,
     settings.paddingLeft,
     settings.paddingRight,
-    settings.letterSpacing
+    settings.letterSpacing,
+    fontsReady
   ]);
 
   const totalPages = Math.max(1, pages.length);

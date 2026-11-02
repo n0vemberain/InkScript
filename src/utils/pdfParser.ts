@@ -99,7 +99,10 @@ export async function extractTextFromPdf(
 
   try {
     loadingTask = pdfjsLib.getDocument({
-      data: arrayBuffer
+      data: arrayBuffer,
+      cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/cmaps/',
+      cMapPacked: true,
+      standardFontDataUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/standard_fonts/'
     });
 
     loadingTask.onPassword = () => {

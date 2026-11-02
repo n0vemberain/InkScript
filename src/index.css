@@ -124,6 +124,7 @@
   .no-print,
   aside,
   button,
+  #inkscript-export-container,
   .lg\:col-span-5 {
     display: none !important;
   }

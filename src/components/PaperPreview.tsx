@@ -139,10 +139,11 @@ export function PaperPreview({
     };
 
     if (settings.paperType === 'ruled' || settings.paperType === 'college-ruled' || settings.paperType === 'legal-pad') {
-      // Synchronize ruling lines with line-height and top margin padding
+      // Calculate dynamic baseline offset so ruling line sits exactly under handwritten glyphs
+      const baselineOffset = Math.round((settings.lineHeight - settings.fontSize) / 2 + settings.fontSize * 0.78) - settings.lineHeight;
       bgStyles.backgroundImage = `linear-gradient(to bottom, transparent calc(${settings.lineHeight}px - 1px), ${paperConfig.lineColor} calc(${settings.lineHeight}px - 1px), ${paperConfig.lineColor} ${settings.lineHeight}px)`;
       bgStyles.backgroundSize = `100% ${settings.lineHeight}px`;
-      bgStyles.backgroundPosition = `0 ${settings.paddingTop - 6}px`;
+      bgStyles.backgroundPosition = `0 ${settings.paddingTop + baselineOffset}px`;
     } else if (settings.paperType === 'grid' || settings.paperType === 'dark-grid') {
       const gridInterval = Math.round(settings.lineHeight * 0.75);
       bgStyles.backgroundImage = `
@@ -157,12 +158,13 @@ export function PaperPreview({
       bgStyles.backgroundSize = `${dotInterval}px ${dotInterval}px`;
       bgStyles.backgroundPosition = `${settings.paddingLeft}px ${settings.paddingTop}px`;
     } else if (settings.paperType === 'vintage') {
+      const baselineOffset = Math.round((settings.lineHeight - settings.fontSize) / 2 + settings.fontSize * 0.78) - settings.lineHeight;
       bgStyles.backgroundImage = `
         radial-gradient(circle at 50% 50%, rgba(217, 119, 6, 0.05) 0%, rgba(180, 120, 60, 0.12) 100%),
         linear-gradient(to bottom, transparent calc(${settings.lineHeight}px - 1px), ${paperConfig.lineColor} calc(${settings.lineHeight}px - 1px), ${paperConfig.lineColor} ${settings.lineHeight}px)
       `;
       bgStyles.backgroundSize = `100% 100%, 100% ${settings.lineHeight}px`;
-      bgStyles.backgroundPosition = `0 0, 0 ${settings.paddingTop - 6}px`;
+      bgStyles.backgroundPosition = `0 0, 0 ${settings.paddingTop + baselineOffset}px`;
     }
 
     return bgStyles;
@@ -181,7 +183,23 @@ export function PaperPreview({
     const lines = pageContent.split('\n');
 
     return lines.map((line, lineIdx) => {
-      const words = line.split(' ');
+      // Empty line / paragraph break - render clean line-height spacer
+      if (!line.trim()) {
+        return (
+          <div
+            key={lineIdx}
+            className="relative select-none pointer-events-none"
+            style={{
+              height: `${settings.lineHeight}px`,
+              lineHeight: `${settings.lineHeight}px`
+            }}
+          >
+            &nbsp;
+          </div>
+        );
+      }
+
+      const words = line.split(/\s+/).filter(Boolean);
 
       return (
         <div
@@ -494,15 +512,16 @@ export function PaperPreview({
 
       {/* Hidden Offscreen Export Stage (Ensures all pages are captured for multi-page PDF generation at true 300 DPI) */}
       <div
+        id="inkscript-export-container"
         aria-hidden="true"
         style={{
           position: 'fixed',
-          left: '-9999px',
+          left: 0,
           top: 0,
           width: '794px',
           pointerEvents: 'none',
           zIndex: -9999,
-          opacity: 1
+          opacity: 0.001
         }}
       >
         {pages.map((pageContent, idx) => renderPaperSheet(idx, pageContent, true))}
