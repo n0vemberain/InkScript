@@ -2,9 +2,9 @@
   "totalFiles": 100,
   "passed": 100,
   "failed": 0,
-  "totalTimeSeconds": 0.08,
-  "averageLatencyMs": 0.77,
-  "timestamp": "2026-11-02T23:14:57.465Z",
+  "totalTimeSeconds": 0.09,
+  "averageLatencyMs": 0.85,
+  "timestamp": "2026-11-02T23:27:10.900Z",
   "results": [
     {
       "index": 1,
@@ -13,7 +13,7 @@
       "sizeBytes": 802,
       "wordCount": 107,
       "pagesGenerated": 1,
-      "durationMs": 1.17,
+      "durationMs": 0.51,
       "status": "PASSED"
     },
     {
@@ -23,7 +23,7 @@
       "sizeBytes": 800,
       "wordCount": 107,
       "pagesGenerated": 1,
-      "durationMs": 0.14,
+      "durationMs": 0.12,
       "status": "PASSED"
     },
     {
@@ -33,7 +33,7 @@
       "sizeBytes": 805,
       "wordCount": 107,
       "pagesGenerated": 1,
-      "durationMs": 0.16,
+      "durationMs": 0.14,
       "status": "PASSED"
     },
     {
@@ -93,7 +93,7 @@
       "sizeBytes": 797,
       "wordCount": 106,
       "pagesGenerated": 1,
-      "durationMs": 0.14,
+      "durationMs": 0.13,
       "status": "PASSED"
     },
     {
@@ -103,7 +103,7 @@
       "sizeBytes": 796,
       "wordCount": 107,
       "pagesGenerated": 1,
-      "durationMs": 0.54,
+      "durationMs": 0.1,
       "status": "PASSED"
     },
     {
@@ -113,7 +113,7 @@
       "sizeBytes": 798,
       "wordCount": 106,
       "pagesGenerated": 1,
-      "durationMs": 0.13,
+      "durationMs": 0.5,
       "status": "PASSED"
     },
     {
@@ -163,7 +163,7 @@
       "sizeBytes": 755,
       "wordCount": 114,
       "pagesGenerated": 1,
-      "durationMs": 0.13,
+      "durationMs": 0.14,
       "status": "PASSED"
     },
     {
@@ -173,7 +173,7 @@
       "sizeBytes": 758,
       "wordCount": 115,
       "pagesGenerated": 1,
-      "durationMs": 0.13,
+      "durationMs": 0.1,
       "status": "PASSED"
     },
     {
@@ -183,7 +183,7 @@
       "sizeBytes": 758,
       "wordCount": 115,
       "pagesGenerated": 1,
-      "durationMs": 0.1,
+      "durationMs": 0.09,
       "status": "PASSED"
     },
     {
@@ -203,7 +203,7 @@
       "sizeBytes": 754,
       "wordCount": 115,
       "pagesGenerated": 1,
-      "durationMs": 0.1,
+      "durationMs": 0.23,
       "status": "PASSED"
     },
     {
@@ -213,7 +213,7 @@
       "sizeBytes": 749,
       "wordCount": 115,
       "pagesGenerated": 1,
-      "durationMs": 0.17,
+      "durationMs": 0.19,
       "status": "PASSED"
     },
     {
@@ -253,7 +253,7 @@
       "sizeBytes": 756,
       "wordCount": 116,
       "pagesGenerated": 1,
-      "durationMs": 0.08,
+      "durationMs": 0.07,
       "status": "PASSED"
     },
     {
@@ -273,7 +273,7 @@
       "sizeBytes": 753,
       "wordCount": 115,
       "pagesGenerated": 1,
-      "durationMs": 0.08,
+      "durationMs": 0.07,
       "status": "PASSED"
     },
     {
@@ -283,7 +283,7 @@
       "sizeBytes": 752,
       "wordCount": 117,
       "pagesGenerated": 1,
-      "durationMs": 0.08,
+      "durationMs": 0.07,
       "status": "PASSED"
     },
     {
@@ -313,7 +313,7 @@
       "sizeBytes": 617,
       "wordCount": 107,
       "pagesGenerated": 1,
-      "durationMs": 0.34,
+      "durationMs": 0.08,
       "status": "PASSED"
     },
     {
@@ -323,7 +323,7 @@
       "sizeBytes": 617,
       "wordCount": 107,
       "pagesGenerated": 1,
-      "durationMs": 0.08,
+      "durationMs": 0.07,
       "status": "PASSED"
     },
     {
@@ -333,7 +333,7 @@
       "sizeBytes": 617,
       "wordCount": 107,
       "pagesGenerated": 1,
-      "durationMs": 0.08,
+      "durationMs": 0.07,
       "status": "PASSED"
     },
     {
@@ -393,7 +393,7 @@
       "sizeBytes": 617,
       "wordCount": 107,
       "pagesGenerated": 1,
-      "durationMs": 0.07,
+      "durationMs": 0.28,
       "status": "PASSED"
     },
     {
@@ -403,7 +403,7 @@
       "sizeBytes": 617,
       "wordCount": 107,
       "pagesGenerated": 1,
-      "durationMs": 0.07,
+      "durationMs": 0.08,
       "status": "PASSED"
     },
     {
@@ -533,7 +533,7 @@
       "sizeBytes": 615,
       "wordCount": 79,
       "pagesGenerated": 1,
-      "durationMs": 0.07,
+      "durationMs": 0.06,
       "status": "PASSED"
     },
     {
@@ -543,7 +543,7 @@
       "sizeBytes": 612,
       "wordCount": 79,
       "pagesGenerated": 1,
-      "durationMs": 0.07,
+      "durationMs": 0.06,
       "status": "PASSED"
     },
     {
@@ -553,7 +553,7 @@
       "sizeBytes": 614,
       "wordCount": 78,
       "pagesGenerated": 1,
-      "durationMs": 0.06,
+      "durationMs": 0.07,
       "status": "PASSED"
     },
     {
@@ -563,7 +563,7 @@
       "sizeBytes": 613,
       "wordCount": 78,
       "pagesGenerated": 1,
-      "durationMs": 0.06,
+      "durationMs": 0.07,
       "status": "PASSED"
     },
     {
@@ -583,7 +583,7 @@
       "sizeBytes": 614,
       "wordCount": 78,
       "pagesGenerated": 1,
-      "durationMs": 0.07,
+      "durationMs": 0.06,
       "status": "PASSED"
     },
     {
@@ -593,7 +593,7 @@
       "sizeBytes": 614,
       "wordCount": 78,
       "pagesGenerated": 1,
-      "durationMs": 0.07,
+      "durationMs": 0.06,
       "status": "PASSED"
     },
     {
@@ -603,7 +603,7 @@
       "sizeBytes": 609,
       "wordCount": 78,
       "pagesGenerated": 1,
-      "durationMs": 0.07,
+      "durationMs": 0.06,
       "status": "PASSED"
     },
     {
@@ -613,7 +613,7 @@
       "sizeBytes": 504,
       "wordCount": 84,
       "pagesGenerated": 1,
-      "durationMs": 0.08,
+      "durationMs": 0.07,
       "status": "PASSED"
     },
     {
@@ -643,7 +643,7 @@
       "sizeBytes": 503,
       "wordCount": 86,
       "pagesGenerated": 1,
-      "durationMs": 0.08,
+      "durationMs": 0.07,
       "status": "PASSED"
     },
     {
@@ -653,7 +653,7 @@
       "sizeBytes": 508,
       "wordCount": 85,
       "pagesGenerated": 1,
-      "durationMs": 0.08,
+      "durationMs": 0.07,
       "status": "PASSED"
     },
     {
@@ -703,7 +703,7 @@
       "sizeBytes": 495,
       "wordCount": 86,
       "pagesGenerated": 1,
-      "durationMs": 0.07,
+      "durationMs": 0.06,
       "status": "PASSED"
     },
     {
@@ -753,7 +753,7 @@
       "sizeBytes": 503,
       "wordCount": 85,
       "pagesGenerated": 1,
-      "durationMs": 0.07,
+      "durationMs": 0.06,
       "status": "PASSED"
     },
     {
@@ -763,7 +763,7 @@
       "sizeBytes": 491,
       "wordCount": 104,
       "pagesGenerated": 1,
-      "durationMs": 0.08,
+      "durationMs": 0.07,
       "status": "PASSED"
     },
     {
@@ -823,7 +823,7 @@
       "sizeBytes": 495,
       "wordCount": 104,
       "pagesGenerated": 1,
-      "durationMs": 0.07,
+      "durationMs": 0.08,
       "status": "PASSED"
     },
     {
@@ -833,7 +833,7 @@
       "sizeBytes": 494,
       "wordCount": 104,
       "pagesGenerated": 1,
-      "durationMs": 0.07,
+      "durationMs": 0.1,
       "status": "PASSED"
     },
     {
@@ -843,7 +843,7 @@
       "sizeBytes": 494,
       "wordCount": 104,
       "pagesGenerated": 1,
-      "durationMs": 0.07,
+      "durationMs": 0.08,
       "status": "PASSED"
     },
     {
@@ -853,7 +853,7 @@
       "sizeBytes": 496,
       "wordCount": 103,
       "pagesGenerated": 1,
-      "durationMs": 0.07,
+      "durationMs": 0.08,
       "status": "PASSED"
     },
     {
@@ -862,8 +862,8 @@
       "type": "Text/Markdown Document",
       "sizeBytes": 8693,
       "wordCount": 1178,
-      "pagesGenerated": 6,
-      "durationMs": 0.64,
+      "pagesGenerated": 9,
+      "durationMs": 0.56,
       "status": "PASSED"
     },
     {
@@ -872,8 +872,8 @@
       "type": "Text/Markdown Document",
       "sizeBytes": 11598,
       "wordCount": 1572,
-      "pagesGenerated": 8,
-      "durationMs": 0.71,
+      "pagesGenerated": 12,
+      "durationMs": 0.7,
       "status": "PASSED"
     },
     {
@@ -882,8 +882,8 @@
       "type": "Text/Markdown Document",
       "sizeBytes": 14503,
       "wordCount": 1966,
-      "pagesGenerated": 10,
-      "durationMs": 0.95,
+      "pagesGenerated": 15,
+      "durationMs": 0.98,
       "status": "PASSED"
     },
     {
@@ -892,8 +892,8 @@
       "type": "Text/Markdown Document",
       "sizeBytes": 17408,
       "wordCount": 2360,
-      "pagesGenerated": 12,
-      "durationMs": 1.13,
+      "pagesGenerated": 18,
+      "durationMs": 0.94,
       "status": "PASSED"
     },
     {
@@ -902,8 +902,8 @@
       "type": "Text/Markdown Document",
       "sizeBytes": 5788,
       "wordCount": 784,
-      "pagesGenerated": 4,
-      "durationMs": 0.37,
+      "pagesGenerated": 6,
+      "durationMs": 0.39,
       "status": "PASSED"
     },
     {
@@ -912,8 +912,8 @@
       "type": "Text/Markdown Document",
       "sizeBytes": 8693,
       "wordCount": 1178,
-      "pagesGenerated": 6,
-      "durationMs": 0.6,
+      "pagesGenerated": 9,
+      "durationMs": 0.66,
       "status": "PASSED"
     },
     {
@@ -922,8 +922,8 @@
       "type": "Text/Markdown Document",
       "sizeBytes": 11598,
       "wordCount": 1572,
-      "pagesGenerated": 8,
-      "durationMs": 0.7,
+      "pagesGenerated": 12,
+      "durationMs": 1.15,
       "status": "PASSED"
     },
     {
@@ -932,8 +932,8 @@
       "type": "Text/Markdown Document",
       "sizeBytes": 14503,
       "wordCount": 1966,
-      "pagesGenerated": 10,
-      "durationMs": 0.99,
+      "pagesGenerated": 15,
+      "durationMs": 0.88,
       "status": "PASSED"
     },
     {
@@ -942,8 +942,8 @@
       "type": "Text/Markdown Document",
       "sizeBytes": 17408,
       "wordCount": 2360,
-      "pagesGenerated": 12,
-      "durationMs": 1.01,
+      "pagesGenerated": 18,
+      "durationMs": 1,
       "status": "PASSED"
     },
     {
@@ -952,8 +952,8 @@
       "type": "Text/Markdown Document",
       "sizeBytes": 5788,
       "wordCount": 784,
-      "pagesGenerated": 4,
-      "durationMs": 0.37,
+      "pagesGenerated": 6,
+      "durationMs": 0.35,
       "status": "PASSED"
     },
     {
@@ -973,7 +973,7 @@
       "sizeBytes": 390,
       "wordCount": 50,
       "pagesGenerated": 2,
-      "durationMs": 0.15,
+      "durationMs": 0.07,
       "status": "PASSED"
     },
     {
@@ -983,7 +983,7 @@
       "sizeBytes": 506,
       "wordCount": 68,
       "pagesGenerated": 1,
-      "durationMs": 0.07,
+      "durationMs": 0.06,
       "status": "PASSED"
     },
     {
@@ -993,7 +993,7 @@
       "sizeBytes": 395,
       "wordCount": 61,
       "pagesGenerated": 1,
-      "durationMs": 0.06,
+      "durationMs": 0.05,
       "status": "PASSED"
     },
     {
@@ -1003,7 +1003,7 @@
       "sizeBytes": 4598,
       "wordCount": 50,
       "pagesGenerated": 1,
-      "durationMs": 59.8,
+      "durationMs": 68.64,
       "status": "PASSED"
     }
   ]

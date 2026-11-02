@@ -222,7 +222,8 @@ During the comprehensive audit and diagnostic cycle, the following engineering r
 5. **Clean Paragraph Break Spacing:** Replaced empty string jitter spans with structural line-height spacer blocks (`&nbsp;`), ensuring empty lines accurately skip notebook lines just like physical handwriting.
 6. **Active Preset Visual Feedback:** Enhanced top toolbar presets with dynamic active status styling reflecting the current paper and ink combination.
 7. **Web Font Readiness Listener:** Integrated `document.fonts.ready` synchronization in the main application loop to automatically re-paginate text once external Google Fonts finish downloading.
-8. **Browser Title and Zero-Emoji Compliance:** Verified that the document `<title>` in `index.html` is strictly `<title>InkScript</title>` and all documentation contains zero emojis.
+8. **Text Line Overlap and Collision Elimination:** Fixed an issue where single-line divs with fixed height could experience CSS line wrapping when text approached the right boundary, causing wrapped tail words to collide with the line below. Resolved by enforcing `whitespace-nowrap overflow-visible` on line containers, incorporating `wordSpacing` and a 28px natural right-margin safety buffer into `paginateText`, and including a 5% cursive glyph measurement buffer.
+9. **Browser Title and Zero-Emoji Compliance:** Verified that the document `<title>` in `index.html` is strictly `<title>InkScript</title>` and all documentation contains zero emojis.
 
 ---
 

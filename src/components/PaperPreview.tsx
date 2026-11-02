@@ -16,6 +16,7 @@ import { paginateText } from '../utils/pagination';
 
 export interface PaperPreviewProps {
   text: string;
+  pages?: string[];
   settings: HandwritingSettings;
   customFonts: CustomFontInfo[];
   currentPage: number;
@@ -76,6 +77,7 @@ function getWordJitterStyle(
 
 export function PaperPreview({
   text,
+  pages: propPages,
   settings,
   customFonts,
   currentPage,
@@ -101,8 +103,9 @@ export function PaperPreview({
     return preset ? preset.fontFamily : "'Caveat', cursive";
   }, [settings.fontId, customFonts]);
 
-  // Dynamically calculate text height and paginate across A4 sheets
-  const pages = useMemo(() => {
+  // Fallback pagination if not provided as prop
+  const computedPages = useMemo(() => {
+    if (propPages) return propPages;
     return paginateText(text, {
       lineHeight: settings.lineHeight,
       fontSize: settings.fontSize,
@@ -113,9 +116,11 @@ export function PaperPreview({
       paddingBottom: settings.paddingBottom,
       paddingLeft: settings.paddingLeft,
       paddingRight: settings.paddingRight,
-      letterSpacing: settings.letterSpacing
+      letterSpacing: settings.letterSpacing,
+      wordSpacing: settings.wordSpacing
     });
   }, [
+    propPages,
     text,
     settings.lineHeight,
     settings.fontSize,
@@ -124,9 +129,11 @@ export function PaperPreview({
     settings.paddingBottom,
     settings.paddingLeft,
     settings.paddingRight,
-    settings.letterSpacing
+    settings.letterSpacing,
+    settings.wordSpacing
   ]);
 
+  const pages = propPages || computedPages;
   const totalPages = Math.max(1, pages.length);
   const safeCurrentPage = Math.min(Math.max(1, currentPage), totalPages);
 
@@ -204,7 +211,7 @@ export function PaperPreview({
       return (
         <div
           key={lineIdx}
-          className="relative whitespace-pre-wrap break-words"
+          className="relative whitespace-nowrap overflow-visible"
           style={{
             height: `${settings.lineHeight}px`,
             lineHeight: `${settings.lineHeight}px`

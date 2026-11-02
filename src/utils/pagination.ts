@@ -9,6 +9,7 @@ export interface SplitTextOptions {
   paddingLeft?: number;
   paddingRight?: number;
   letterSpacing?: number;
+  wordSpacing?: number;
 }
 
 let measurementCanvas: HTMLCanvasElement | null = null;
@@ -24,14 +25,15 @@ function getWordWidth(word: string, fontSize: number, fontFamily: string, letter
         ctx.font = `500 ${fontSize}px ${fontFamily}`;
         const measured = ctx.measureText(word).width;
         const spacingExtra = word.length * Math.max(0, letterSpacing);
-        return measured + spacingExtra;
+        // Include subtle 5% buffer for cursive glyph slants, flourishes and handwriting jitter
+        return Math.ceil(measured * 1.05 + spacingExtra);
       }
     } catch {
       // Fallback below
     }
   }
-  // Heuristic average character width for handwriting glyphs
-  return word.length * (fontSize * 0.44 + Math.max(0, letterSpacing));
+  // Heuristic average character width for handwriting glyphs (including cursive slant)
+  return Math.ceil(word.length * (fontSize * 0.48 + Math.max(0, letterSpacing)));
 }
 
 /**
@@ -56,11 +58,13 @@ export function paginateText(
     paddingBottom = 48,
     paddingLeft = 84,
     paddingRight = 48,
-    letterSpacing = 0.5
+    letterSpacing = 0.5,
+    wordSpacing = 2
   } = options;
 
-  // Available dimensions for handwritten text
-  const usableWidth = Math.max(280, pageWidth - paddingLeft - paddingRight);
+  // Natural right-margin safety padding (prevents overflow and awkward edge-hugging)
+  const rightMarginSafety = 28;
+  const usableWidth = Math.max(260, pageWidth - paddingLeft - paddingRight - rightMarginSafety);
   const usableHeight = Math.max(300, pageHeight - paddingTop - paddingBottom);
   
   // Maximum lines that fit vertically on one A4 paper sheet
@@ -99,11 +103,11 @@ export function paginateText(
       const words = para.split(/\s+/).filter(Boolean);
       let activeLineWords: string[] = [];
       let activeLineWidth = 0;
-      const spaceWidth = getWordWidth(' ', fontSize, fontFamily, letterSpacing);
+      const spaceWidth = getWordWidth(' ', fontSize, fontFamily, letterSpacing) + wordSpacing;
 
       for (let wIdx = 0; wIdx < words.length; wIdx++) {
         const word = words[wIdx];
-        const wordWidth = getWordWidth(word, fontSize, fontFamily, letterSpacing);
+        const wordWidth = getWordWidth(word, fontSize, fontFamily, letterSpacing) + wordSpacing;
 
         if (activeLineWords.length === 0) {
           activeLineWords.push(word);

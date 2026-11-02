@@ -69,7 +69,8 @@ export function App() {
       paddingBottom: settings.paddingBottom,
       paddingLeft: settings.paddingLeft,
       paddingRight: settings.paddingRight,
-      letterSpacing: settings.letterSpacing
+      letterSpacing: settings.letterSpacing,
+      wordSpacing: settings.wordSpacing
     });
   }, [
     text,
@@ -81,6 +82,7 @@ export function App() {
     settings.paddingLeft,
     settings.paddingRight,
     settings.letterSpacing,
+    settings.wordSpacing,
     fontsReady
   ]);
 
@@ -290,6 +292,7 @@ export function App() {
           <div className="lg:col-span-7 lg:sticky lg:top-20">
             <PaperPreview
               text={text}
+              pages={pages}
               settings={settings}
               customFonts={customFonts}
               currentPage={currentPage}
